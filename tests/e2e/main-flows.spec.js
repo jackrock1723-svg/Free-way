@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// This spec exercises the built-in demo sample project, which is no longer selected by default.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { if (!localStorage.getItem('fc.project')) localStorage.setItem('fc.project', 'demo'); }); });
+
 // Click through every main button and flow; the app must never crash or leak raw server errors.
 function guard(page) {
   const problems = [];
@@ -52,7 +55,7 @@ test('home: new project dialog cancel and create, mission toggle, build starts',
 test('every primary section opens without crashing', async ({ page }) => {
   const problems = guard(page);
   await page.goto('/');
-  for (const section of ['Home', 'Board', 'Chat', 'Apps', 'Preview', 'Me', 'Settings', 'Home']) {
+  for (const section of ['Home', 'Board', 'Apps', 'Preview', 'Me', 'Settings', 'Home']) {
     await nav(page, section);
     await expect(page.locator('.topbar p')).toHaveText(section);
     await noCrash(page, problems);
@@ -62,7 +65,7 @@ test('every primary section opens without crashing', async ({ page }) => {
 test('chat: send, new chat, archived toggle', async ({ page }) => {
   const problems = guard(page);
   await page.goto('/');
-  await nav(page, 'Chat');
+  await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   await page.getByLabel('New message').fill('Say hello');
   await page.getByRole('button', { name: 'Send' }).click();
   await expect(page.locator('.message-assistant').last()).not.toHaveText(/Thinking/);

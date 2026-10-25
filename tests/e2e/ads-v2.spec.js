@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// This spec exercises the built-in demo sample project, which is no longer selected by default.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { if (!localStorage.getItem('fc.project')) localStorage.setItem('fc.project', 'demo'); }); });
+
 const AD = {
   id: 'imp-e2e-1', sig: 'sig-e2e', label: 'Sponsored', advertiser: 'Tablestack', title: 'A free Postgres in 10 seconds',
   text: 'Branching databases for every agent run.', url: 'https://example.com/tablestack', placement: 'chat', category: 'databases',
@@ -14,7 +17,7 @@ test('chat shows a closable sponsored card after a reply without blocking the co
     await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Chat', exact: true }).click();
+  await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   await page.getByLabel('New message').fill('Which database should I use for my app?');
   await page.getByRole('button', { name: 'Send' }).click();
   const card = page.getByRole('complementary', { name: 'Sponsored' });
@@ -31,7 +34,7 @@ test('chat shows a closable sponsored card after a reply without blocking the co
 test('an ad failure never shows an error to the user', async ({ page }) => {
   await page.route('**/api/ads/next', (route) => route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' }));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Chat', exact: true }).click();
+  await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   await page.getByLabel('New message').fill('hello there');
   await page.getByRole('button', { name: 'Send' }).click();
   await expect(page.locator('.message-assistant').last()).not.toHaveText(/Thinking/);

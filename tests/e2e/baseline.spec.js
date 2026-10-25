@@ -27,7 +27,7 @@ test('React shell loads without provider requests and Google Sign-In stays disab
   await expect(page).toHaveTitle('Free way');
   await expect(page.getByRole('heading', { name: 'Build with clear intent.' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Skip to content' })).toHaveCount(1);
-  await expect(page.locator('.runtime-panel')).toBeVisible();
+  await expect(page.locator('.runtime-panel')).toHaveCount(0);  // status panel removed from Home (info: sidebar + admin overview)
   const authMode = await page.evaluate(async () => {
     if (!window.GoogleSignIn) return 'missing';
     await window.GoogleSignIn.ready;

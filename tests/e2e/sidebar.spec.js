@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+// Uses the built-in demo sample project (no longer the default) so a project with history exists.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { if (!localStorage.getItem('fc.project')) localStorage.setItem('fc.project', 'demo'); }); });
+
 test('sidebar: new chat, projects with their chat history, open a chat, profile/session area, collapse', async ({ page }) => {
+  test.skip(test.info().project.name === 'mobile-chromium', 'The sidebar (new chat, projects, history) is hidden on small screens by design.');
   await page.goto('/');
   const side = page.getByRole('complementary', { name: 'Free way workspace' });
   await expect(side.getByRole('button', { name: 'Start a new chat' })).toBeVisible();
@@ -13,14 +17,13 @@ test('sidebar: new chat, projects with their chat history, open a chat, profile/
 
   // New chat -> send a message -> it shows under the current project and reopens from the sidebar
   await side.getByRole('button', { name: 'Start a new chat' }).click();
-  const box = page.getByRole('textbox', { name: /message|chat/i }).first();
-  await box.fill('sidebar history check');
-  await box.press('Enter');
-  const item = projects.locator('.sidebar-chat', { hasText: 'sidebar history check' });
+  await page.getByLabel('Build prompt').fill('hello there');
+  await page.getByRole('button', { name: 'Build' }).click();
+  const item = projects.locator('.sidebar-chat', { hasText: 'hello there' });
   await expect(item).toBeVisible({ timeout: 20_000 });
   await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Home', exact: true }).click();
   await item.click();
-  await expect(page.locator('.messages')).toContainText('sidebar history check');
+  await expect(page.getByRole('region', { name: 'Conversation' }).or(page.locator('.home-messages'))).toContainText('hello there');
   await expect(item).toHaveClass(/is-current/);
 
   // New project opens the existing dialog

@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// This spec exercises the built-in demo sample project, which is no longer selected by default.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { if (!localStorage.getItem('fc.project')) localStorage.setItem('fc.project', 'demo'); }); });
+
 async function openOfflineWorkspace(page) {
   const externalRequests = [];
   await page.route('**/*', async (route) => {

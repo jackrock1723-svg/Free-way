@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// This spec exercises the built-in demo sample project, which is no longer selected by default.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { if (!localStorage.getItem('fc.project')) localStorage.setItem('fc.project', 'demo'); }); });
+
 async function openChat(page, setup) {
   const externalRequests = [];
   await page.route('**/*', async (route) => {
@@ -9,7 +12,7 @@ async function openChat(page, setup) {
   });
   if (setup) await setup();
   await page.goto('/');
-  await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Chat', exact: true }).click();
+  await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Chat', exact: true })).toBeVisible();
   return externalRequests;
 }
@@ -35,7 +38,7 @@ test('mouse and keyboard menus pin and unpin a chat and keep the choice after re
   await expect(row.getByText('Pinned', { exact: true })).toBeVisible();
 
   await page.reload();
-  await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Chat', exact: true }).click();
+  await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   row = chatRow(page, 'Pin this conversation');
   await expect(row.getByText('Pinned', { exact: true })).toBeVisible();
   const trigger = row.getByRole('button', { name: 'Actions for Pin this conversation' });
@@ -112,7 +115,7 @@ test('reload restores both the saved transcript and its renamed chat row', async
   await page.getByRole('button', { name: 'Save title', exact: true }).click();
 
   await page.reload();
-  await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Chat', exact: true }).click();
+  await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   row = chatRow(page, 'Saved local conversation');
   await expect(row).toBeVisible();
   await expect(page.getByText('Keep this transcript on reload', { exact: true })).toBeVisible();

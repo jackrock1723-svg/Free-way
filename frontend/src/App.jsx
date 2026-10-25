@@ -29,7 +29,7 @@ import UpdatesSettings from './features/settings/UpdatesSettings.jsx';
 import AdsPrivacySettings from './features/settings/AdsPrivacySettings.jsx';
 import AdSlot from './features/ads/AdSlot.jsx';
 
-const sections = ['Home', 'Board', 'Chat', 'Apps', 'Preview', 'Me', 'Settings'];
+const sections = ['Home', 'Board', 'Apps', 'Preview', 'Me', 'Settings'];  // chats live in the sidebar and on Home
 const iconPaths = {
   Home: 'M3 10.5 12 3l9 7.5M5.5 9.5V21h13V9.5M9 21v-6h6v6',
   Board: 'M4 4h7v7H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 13h7v7H4z',
@@ -142,8 +142,10 @@ const CHAT_STORAGE_WARNING = 'Chat history is available only in this session bec
 export default function App() {
   const [view, setView] = useState('Home');
   const [config, setConfig] = useState(null);
-  const [projects, setProjects] = useState([{ id: 'demo', name: 'Free way' }]);
-  const [project, setProject] = useState(() => { try { return localStorage.getItem('fc.project') || 'demo'; } catch { return 'demo'; } });
+  const [projects, setProjects] = useState([]);
+  // No sample default: the user's own project (remembered) or none until they create one. The demo project still exists on the server.
+  const [project, setProject] = useState(() => { try { return localStorage.getItem('fc.project') || ''; } catch { return ''; } });
+  const realProjects = [...(project && !projects.some((item) => item.id === project) ? [{ id: project, name: project }] : []), ...projects.filter((item) => item.id !== 'demo' || item.id === project)];
   const [agents, setAgents] = useState([]);
   const [agent, setAgent] = useState(null);
   const [connectors, setConnectors] = useState([]);
@@ -310,6 +312,7 @@ export default function App() {
     event.preventDefault();
     const prompt = buildPrompt.trim();
     if (!prompt) { setError('Describe what you want built.'); return; }
+    if (!project) { setBuildPrompt(''); await sendChat(null, prompt); return; }  // never build without a project
     setBuilding(true); setError(''); setNotice('');
     try {
       const created = mission
@@ -319,7 +322,7 @@ export default function App() {
       setAgents((current) => [created, ...current.filter((item) => item.id !== created.id)]);
       setBuildPrompt(''); setMission(false); setView('Board'); setDiff(null); setReview(null);
     } catch (requestError) {
-      if (isChitChatError(requestError)) { setBuildPrompt(''); await replyOnHome(prompt); }
+      if (isChitChatError(requestError)) { setBuildPrompt(''); setBuilding(false); await sendChat(null, prompt); }
       else setError(errorText(requestError));
     }
     finally { setBuilding(false); }
@@ -555,9 +558,9 @@ export default function App() {
     setNotice(result.ok ? 'Chat deleted.' : CHAT_STORAGE_WARNING);
   }
 
-  async function sendChat(event) {
+  async function sendChat(event, override) {
     event?.preventDefault();
-    const text = chatText.trim();
+    const text = (typeof override === 'string' ? override : chatText).trim();
     if (!text || chatBusy || activeChat?.archived) return;
     const chatId = activeChatId || createChatId();
     const currentMessages = messages.filter((message) => !message.pending);
@@ -656,7 +659,7 @@ export default function App() {
         <a className="brand" href="#home" onClick={(event) => { event.preventDefault(); go('Home'); }} aria-label="Free way home"><img src="/icon.svg" alt="" width="34" height="34" /><span>Free way</span></a>
         <button type="button" className="sidebar-toggle" aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebarCollapsed} onClick={toggleSidebar}>{sidebarCollapsed ? '»' : '«'}</button>
         <div className="sidebar-actions">
-          <button type="button" className="sidebar-action" aria-label="Start a new chat" onClick={() => { startNewChat(); go('Chat'); }}><span aria-hidden="true">+</span><span className="sidebar-label">New chat</span></button>
+          <button type="button" className="sidebar-action" aria-label="Start a new chat" onClick={() => { startNewChat(); go('Home'); }}><span aria-hidden="true">+</span><span className="sidebar-label">New chat</span></button>
           <button type="button" className="sidebar-action" aria-label="Start a new project" onClick={() => setProjectDialog(true)}><span aria-hidden="true">▣</span><span className="sidebar-label">New project</span></button>
         </div>
         <p className="nav-caption">Workspace</p>
@@ -665,17 +668,20 @@ export default function App() {
         </nav>
         <section className="sidebar-projects" aria-label="Projects">
           <p className="nav-caption">Projects</p>
-          {[{ id: 'demo', name: 'Free way' }, ...projects.filter((item) => item.id !== 'demo')].map((item) => {
-            const projectChats = activeChats.filter((chat) => (chat.project || 'demo') === item.id);
+          {realProjects.length === 0 && <p className="sidebar-empty">No projects yet</p>}
+          {realProjects.map((item) => {
+            const projectChats = activeChats.filter((chat) => (chat.project || '') === item.id);
             const current = item.id === project;
             return <div className={`sidebar-project${current ? ' is-current' : ''}`} key={item.id}>
               <button type="button" className="sidebar-project-name" aria-current={current ? 'true' : undefined} onClick={() => chooseProject(item.id)}>{item.name || item.id}<span className="sidebar-count">{projectChats.length}</span></button>
               {current && <ul className="sidebar-chats" aria-label={`Chats in ${item.name || item.id}`}>
-                {projectChats.length === 0 ? <li className="sidebar-empty">No chats yet</li> : projectChats.slice(0, 30).map((chat) => <li key={chat.id}><button type="button" className={`sidebar-chat${chat.id === activeChatId ? ' is-current' : ''}`} onClick={() => { selectChat(chat.id); go('Chat'); }}>{chat.title || 'Untitled chat'}</button></li>)}
+                {projectChats.length === 0 ? <li className="sidebar-empty">No chats yet</li> : projectChats.slice(0, 30).map((chat) => <li key={chat.id}><button type="button" className={`sidebar-chat${chat.id === activeChatId ? ' is-current' : ''}`} onClick={() => { selectChat(chat.id); go('Home'); }}>{chat.title || 'Untitled chat'}</button></li>)}
               </ul>}
             </div>;
           })}
+          {activeChats.some((chat) => !chat.project || !realProjects.some((item) => item.id === chat.project)) && <button type="button" className="sidebar-project-name" onClick={() => go('Chat')}>Other chats<span className="sidebar-count">{activeChats.filter((chat) => !chat.project || !realProjects.some((item) => item.id === chat.project)).length}</span></button>}
         </section>
+        <button type="button" className="text-button sidebar-manage" onClick={() => go('Chat')}>Manage chats</button>
         <div className="sidebar-footer">
           <button type="button" className="profile-button" aria-label="Profile" onClick={() => go('Me')}>P</button>
           <div className="sidebar-session"><span><span className="local-dot" aria-hidden="true" /> {config?.mode === 'cloud' ? 'Cloud workspace' : 'Local workspace'}</span><small>{agents.length} sessions · {activeChats.length} chats</small></div>
@@ -693,28 +699,24 @@ export default function App() {
 
           {view === 'Home' && <section className="landing" aria-labelledby="welcome-title">
             <div className="landing-copy">
-              <p className="eyebrow"><span aria-hidden="true" />Free way workspace</p>
+              {messages.length === 0 && <><p className="eyebrow"><span aria-hidden="true" />Free way workspace</p>
               <h1 id="welcome-title">Build with clear intent.</h1>
-              <p className="lead">Describe a change. Review the plan. Approve each action before it runs.</p>
+              <p className="lead">Describe a change. Review the plan. Approve each action before it runs.</p></>}
+              {messages.length > 0 && <div className="messages home-messages" aria-live="polite" aria-label="Conversation">{messages.map((message, index) => <article className={`message message-${message.role}`} key={`${index}-${message.role}`}><strong>{message.role === 'user' ? 'You' : 'Free way'}</strong><p>{message.content || (message.pending ? 'Thinking…' : '')}</p></article>)}</div>}
               <form className="build-form" onSubmit={buildTask}>
                 <label htmlFor="active-project">Project</label>
-                <div className="project-row"><select id="active-project" aria-label="Active project" value={project} onChange={(event) => chooseProject(event.target.value)}><option value="demo">demo · Free way</option>{projects.filter((item) => item.id !== 'demo').map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>
+                {realProjects.length === 0 && !project
+                  ? <div className="project-row project-empty"><p>Create your first project to start building. You can still chat without one.</p><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>
+                  : <div className="project-row"><select id="active-project" aria-label="Active project" value={project} onChange={(event) => chooseProject(event.target.value)}>{!project && <option value="">Choose a project</option>}{realProjects.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>}
                 <label htmlFor="build-prompt">What should Free way build?</label>
                 <textarea id="build-prompt" aria-label="Build prompt" value={buildPrompt} onChange={(event) => setBuildPrompt(event.target.value)} placeholder="Describe a small, testable change" rows="4" />
                 <label className="check-row"><input type="checkbox" checked={mission} onChange={(event) => setMission(event.target.checked)} /> Mission</label>
                 <p className="subtle">Standard builds use four sequential specialists. Mission keeps its existing milestone approval flow.</p>
                 <button className="button button-primary" type="submit" disabled={building}>{building ? 'Starting…' : 'Build'}</button>
               </form>
-              {homeReply && <section className="home-reply" aria-label="Free way reply" aria-live="polite">
-                <p className="home-reply-question"><strong>You:</strong> {homeReply.question}</p>
-                <p className="home-reply-answer">{homeReply.answer || (homeReply.pending ? 'Thinking…' : '')}</p>
-                <div className="home-reply-actions">
-                  <button type="button" className="button" onClick={() => { selectChat(homeReply.chatId); setView('Chat'); }}>Continue in Chat</button>
-                  <button type="button" className="text-button" onClick={() => setHomeReply(null)}>Close</button>
-                </div>
-              </section>}
+              
             </div>
-            <aside className="runtime-panel" aria-label="Workspace status"><div className="runtime-heading"><span>Workspace status</span><span className="runtime-badge">LOCAL</span></div><dl><div><dt>Project</dt><dd>{selectedProject.id}</dd></div><div><dt>Agent server</dt><dd>Python</dd></div><div><dt>Google Sign-In</dt><dd>Off</dd></div><div><dt>Sessions</dt><dd>{agents.length}</dd></div></dl><p className="runtime-note">Plans and actions wait for your approval. Review and merge stay separate.</p></aside>
+            
           </section>}
 
           {view === 'Board' && <section className="workspace-page"><div className="section-heading"><div><h1>Board</h1><p>Plans, actions, and reviews stay in their current state until you decide.</p></div></div>

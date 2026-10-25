@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// This spec exercises the built-in demo sample project, which is no longer selected by default.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { if (!localStorage.getItem('fc.project')) localStorage.setItem('fc.project', 'demo'); }); });
+
 async function openOfflineWorkspace(page, beforeNavigation) {
   const externalRequests = [];
   await page.route('**/*', async (route) => {
@@ -37,7 +40,7 @@ const primary = (page) => page.getByRole('navigation', { name: 'Primary navigati
 
 test('new chat renders a streamed reply from the offline mock server', async ({ page }) => {
   const externalRequests = await openOfflineWorkspace(page);
-  await primary(page).getByRole('button', { name: 'Chat' }).click();
+  await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   await page.getByLabel('New message').fill('hello from the workspace test');
   await page.getByRole('button', { name: 'Send' }).click();
   await expect(page.getByText('Demo reply: hello from the workspace test')).toBeVisible();
@@ -65,8 +68,8 @@ test('project picker selects and creates a project successfully', async ({ page 
   }
   await expect(project).toHaveValue('workspace-sample');
   await expect(page.getByText('Project created: workspace-sample', { exact: true })).toBeVisible();
-  await project.selectOption('demo');
-  await expect(project).toHaveValue('demo');
+  // The demo sample is not offered once the user has a real project.
+  await expect(project.locator('option[value="demo"]')).toHaveCount(0);
   expect(externalRequests).toEqual([]);
 });
 
@@ -159,7 +162,7 @@ test('Preview provides refresh and in-session back/forward navigation after a co
 test('responsive navigation reaches all six core workspace sections', async ({ page }) => {
   const externalRequests = await openOfflineWorkspace(page);
   const nav = primary(page);
-  for (const section of ['Home', 'Board', 'Chat', 'Apps', 'Preview', 'Me']) {
+  for (const section of ['Home', 'Board', 'Apps', 'Preview', 'Me']) {
     const control = nav.getByRole('button', { name: section, exact: true });
     await expect(control).toBeVisible();
     await control.click();
