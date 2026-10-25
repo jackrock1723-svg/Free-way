@@ -885,3 +885,34 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .error-screen h2 { margin: 0 0 8px; }
 .error-screen p { color: var(--muted); }
 .error-screen-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+
+/* Free way default: white background, black text, pink accent. "Auto" (the default) and "Light" use it on every OS;
+   Dark and the other presets stay available. Hard-coded dark-theme colours get readable light counterparts (WCAG AA). */
+.workspace-shell[data-theme="auto"],
+.workspace-shell[data-theme="light"] { --canvas: #ffffff; --sidebar: #f6f6f7; --surface: #ffffff; --surface-raised: #f9f9fb; --line: #d4d4d8; --text: #0a0a0a; --muted: #3f3f46; --faint: #52525b; --accent: #db2777; --accent-soft: #fce7f3; --focus: #be185d; --good: #166534; color-scheme: light; }
+.workspace-shell[data-theme="auto"] .nav-item.is-current,
+.workspace-shell[data-theme="light"] .nav-item.is-current { color: #831843; }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .runtime-panel { background: var(--surface-raised); }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .runtime-badge { border-color: var(--line); color: var(--focus); }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .alert { border-color: #f0a3bd; background: #fff1f5; color: #881337; }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) :is(.error-text, .settings-inline-error) { color: #b91c1c; }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .text-button { color: #9f1239; }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .button-warning { border-color: #c2410c; background: #fff7ed; color: #7c2d12; }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) :is(.chat-history-open:hover, .chat-history-open[aria-current="true"]) { color: var(--text); }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"]) .button-primary { background: #be185d; color: #ffffff; }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"]) .button-primary:hover { background: #9d174d; }
+.workspace-shell input, .workspace-shell textarea, .workspace-shell select { color: var(--text); }
+.workspace-shell :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
+.workspace-shell[data-theme="dark"] .alert { color: #ffd6d7; }
+
+/* Cloud access-token sign-in box */
+.token-signin { display: grid; gap: 10px; margin: 0 0 18px; padding: 16px; border: 1px solid var(--accent); border-radius: var(--radius-medium); background: var(--surface); color: var(--text); max-width: 640px; }
+.token-signin h2 { margin: 0; font-size: 17px; }
+.token-signin p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.token-signin-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.token-signin-row input { flex: 1 1 240px; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--surface); color: var(--text); font-family: var(--font-mono); }
+.token-signin .token-signin-error { color: #b91c1c; font-weight: 600; }
+.workspace-shell[data-theme="dark"] .token-signin .token-signin-error { color: #ffb4b4; }
+
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .state-badge { border-color: #f0a3bd; color: #831843; }
+.workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .state-badge.is-connected { border-color: #86efac; background: #dcfce7; color: #14532d; }

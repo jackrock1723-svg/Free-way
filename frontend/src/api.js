@@ -29,6 +29,26 @@ function savedToken() {
   }
 }
 
+export function saveToken(token) {
+  const value = String(token || '').trim();
+  try {
+    if (value) globalThis.localStorage?.setItem('fc.token', value);
+    else globalThis.localStorage?.removeItem('fc.token');
+  } catch {
+    return false;
+  }
+  return Boolean(value);
+}
+
+export async function tokenWorks(token) {
+  try {
+    const res = await fetch('/api/config', { headers: { Authorization: `Bearer ${String(token || '').trim()}` }, credentials: 'same-origin' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function restoreLegacyUrlToken() {
   const browser = globalThis.window;
   const auth = browser?.GoogleSignIn;

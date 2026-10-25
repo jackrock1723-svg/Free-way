@@ -11,6 +11,7 @@ import { settingsApi } from './features/settings/settingsApi.js';
 import { SettingsNav } from './features/settings/SettingsNav.jsx';
 import GeneralSettings from './features/settings/GeneralSettings.jsx';
 import AppearanceSettings from './features/settings/AppearanceSettings.jsx';
+import TokenSignIn, { NEEDS_TOKEN } from './features/auth/TokenSignIn.jsx';
 import KeyboardSettings, { DEFAULT_SHORTCUTS, shortcutFromEvent } from './features/settings/KeyboardSettings.jsx';
 import ProjectSettings from './features/settings/ProjectSettings.jsx';
 import AccountSettings from './features/settings/AccountSettings.jsx';
@@ -634,7 +635,7 @@ export default function App() {
         <div className="page-content">
           <ErrorBoundary compact key={view}>
           <CrashProbe />
-          {error && <div className="alert" role="alert">{error}<button type="button" aria-label="Dismiss error" onClick={() => setError('')}>Dismiss</button></div>}
+          {error && NEEDS_TOKEN.test(error) ? <TokenSignIn /> : error && <div className="alert" role="alert">{error}<button type="button" aria-label="Dismiss error" onClick={() => setError('')}>Dismiss</button></div>}
           {notice && <p className="toast" role="status">{notice}</p>}
           {loading && <p className="loading-note" role="status">Loading workspace…</p>}
 
