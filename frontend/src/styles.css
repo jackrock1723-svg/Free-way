@@ -916,3 +916,9 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 
 .workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .state-badge { border-color: #f0a3bd; color: #831843; }
 .workspace-shell:is([data-theme="auto"], [data-theme="light"], [data-theme="paper"], [data-theme="frost"]) .state-badge.is-connected { border-color: #86efac; background: #dcfce7; color: #14532d; }
+
+/* Inline reply on Home for greetings/questions */
+.home-reply { margin: 16px 0 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-medium); background: var(--surface-raised); color: var(--text); max-width: 640px; }
+.home-reply p { margin: 0 0 8px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.home-reply-question { color: var(--muted); }
+.home-reply-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }

@@ -5,6 +5,7 @@ import { mergeRequestPayload } from './merge.js';
 import { normalizePreviewPath, previewBaseFor, previewPathFromLocation } from './preview.js';
 import { mergeProjectList } from './projects.js';
 import { createChatStore } from './features/chat-history/chatStore.js';
+import { isChitChatError } from './homeRouting.js';
 import { ChatRowMenu } from './features/chat-history/ChatRowMenu.jsx';
 import { ArchivedChats } from './features/chat-history/ArchivedChats.jsx';
 import { settingsApi } from './features/settings/settingsApi.js';
@@ -157,6 +158,7 @@ export default function App() {
   const [projectDialog, setProjectDialog] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [chatStore] = useState(() => createChatStore(browserStorage()));
+  const [homeReply, setHomeReply] = useState(null);
   const [chats, setChats] = useState(() => chatStore.getChats());
   const [activeChatId, setActiveChatId] = useState(() => getInitialChatId(chatStore));
   const activeChatIdRef = useRef(activeChatId);
@@ -314,8 +316,34 @@ export default function App() {
       setAgent(created);
       setAgents((current) => [created, ...current.filter((item) => item.id !== created.id)]);
       setBuildPrompt(''); setMission(false); setView('Board'); setDiff(null); setReview(null);
-    } catch (requestError) { setError(errorText(requestError)); }
+    } catch (requestError) {
+      if (isChitChatError(requestError)) { setBuildPrompt(''); await replyOnHome(prompt); }
+      else setError(errorText(requestError));
+    }
     finally { setBuilding(false); }
+  }
+
+  // Greeting/question typed on Home: answer inline with the normal chat backend and keep it in chat history.
+  async function replyOnHome(text) {
+    const chatId = createChatId();
+    const outgoing = [{ role: 'user', content: text }];
+    setHomeReply({ chatId, question: text, answer: '', pending: true });
+    persistChatMessages(chatId, [...outgoing, { role: 'assistant', content: '', pending: true }]);
+    let answer = '';
+    const finish = (content) => {
+      setHomeReply({ chatId, question: text, answer: content, pending: false });
+      persistChatMessages(chatId, [...outgoing, { role: 'assistant', content }]);
+    };
+    try {
+      await api.streamChat({ mode: 'chat', model: 'auto', messages: outgoing }, {
+        onDelta: (delta) => { answer += delta; setHomeReply({ chatId, question: text, answer, pending: true }); },
+        onComplete: (result) => finish(answer || result?.reply || 'The reply was empty.'),
+        onError: (streamError) => { setError(errorText(streamError)); },
+      });
+    } catch (streamError) {
+      setError(errorText(streamError));
+      finish(answer || 'The reply stopped before completion.');
+    }
   }
 
   async function refreshAgent(id = activeAgent?.id) {
@@ -653,6 +681,14 @@ export default function App() {
                 <p className="subtle">Standard builds use four sequential specialists. Mission keeps its existing milestone approval flow.</p>
                 <button className="button button-primary" type="submit" disabled={building}>{building ? 'Starting…' : 'Build'}</button>
               </form>
+              {homeReply && <section className="home-reply" aria-label="Free way reply" aria-live="polite">
+                <p className="home-reply-question"><strong>You:</strong> {homeReply.question}</p>
+                <p className="home-reply-answer">{homeReply.answer || (homeReply.pending ? 'Thinking…' : '')}</p>
+                <div className="home-reply-actions">
+                  <button type="button" className="button" onClick={() => { selectChat(homeReply.chatId); setView('Chat'); }}>Continue in Chat</button>
+                  <button type="button" className="text-button" onClick={() => setHomeReply(null)}>Close</button>
+                </div>
+              </section>}
             </div>
             <aside className="runtime-panel" aria-label="Workspace status"><div className="runtime-heading"><span>Workspace status</span><span className="runtime-badge">LOCAL</span></div><dl><div><dt>Project</dt><dd>{selectedProject.id}</dd></div><div><dt>Agent server</dt><dd>Python</dd></div><div><dt>Google Sign-In</dt><dd>Off</dd></div><div><dt>Sessions</dt><dd>{agents.length}</dd></div></dl><p className="runtime-note">Plans and actions wait for your approval. Review and merge stay separate.</p></aside>
           </section>}
