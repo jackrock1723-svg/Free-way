@@ -922,3 +922,32 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .home-reply p { margin: 0 0 8px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .home-reply-question { color: var(--muted); }
 .home-reply-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Freebuff-style sidebar: actions, projects with their chat history, profile + session info, collapsible */
+.sidebar { overflow: hidden; }
+.sidebar-toggle { align-self: flex-end; min-width: 32px; min-height: 32px; margin: -6px 0 4px; border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--surface); color: var(--text); cursor: pointer; }
+.sidebar-actions { display: grid; gap: 6px; margin: 4px 0 10px; }
+.sidebar-action { display: flex; align-items: center; gap: 9px; min-height: 38px; padding: 0 11px; border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--surface); color: var(--text); font-weight: 560; text-align: left; cursor: pointer; }
+.sidebar-action:hover { border-color: var(--accent); background: var(--accent-soft); }
+.sidebar-projects { flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-y: auto; }
+.sidebar-project-name { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 8px; min-height: 34px; padding: 0 10px; border: 0; border-radius: var(--radius-small); background: transparent; color: var(--muted); text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.sidebar-project.is-current .sidebar-project-name { background: var(--accent-soft); color: var(--text); font-weight: 620; }
+.sidebar-count { color: var(--muted); font-size: 11px; }
+.sidebar-chats { margin: 4px 0 8px; padding: 0 0 0 10px; list-style: none; }
+.sidebar-chat { display: block; width: 100%; padding: 6px 10px; border: 0; border-radius: var(--radius-small); background: transparent; color: var(--text); font-size: 13px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.sidebar-chat:hover, .sidebar-chat.is-current { background: var(--surface-raised); }
+.sidebar-chat.is-current { font-weight: 620; }
+.sidebar-empty { padding: 6px 10px; color: var(--muted); font-size: 12px; }
+.sidebar-footer { display: flex; align-items: center; gap: 10px; }
+.profile-button { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #be185d; color: #ffffff; font-weight: 700; cursor: pointer; }
+.sidebar-session { display: grid; min-width: 0; gap: 2px; color: var(--text); font-size: 12px; }
+.sidebar-session small { color: var(--muted); font-size: 11px; }
+.workspace-shell.sidebar-collapsed { grid-template-columns: 64px minmax(0, 1fr); }
+.workspace-shell.sidebar-collapsed .sidebar { padding-left: 8px; padding-right: 8px; }
+.workspace-shell.sidebar-collapsed :is(.sidebar-label, .nav-caption, .sidebar-projects, .sidebar-session, .brand span, .nav-item span) { display: none; }
+.workspace-shell.sidebar-collapsed .sidebar-toggle { align-self: center; }
+.workspace-shell.sidebar-collapsed .sidebar-action { justify-content: center; padding: 0; }
+@media (max-width: 760px) {
+  .sidebar-toggle, .sidebar-actions, .sidebar-projects { display: none; }
+  .workspace-shell.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+}

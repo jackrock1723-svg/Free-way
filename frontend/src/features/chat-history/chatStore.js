@@ -26,6 +26,7 @@ function normalizeChat(chat) {
     msgs,
     pinned: chat.pinned === true,
     archived: chat.archived === true,
+    project: typeof chat.project === 'string' ? chat.project : '',
   };
 }
 

@@ -56,7 +56,7 @@ test('project picker selects and creates a project successfully', async ({ page 
   const project = page.getByLabel('Active project');
   try {
     await project.selectOption('demo');
-    await page.getByRole('button', { name: 'New project' }).click();
+    await page.getByRole('button', { name: 'New project', exact: true }).click();
     await page.getByLabel('Project name').fill('Workspace Sample');
     await page.getByRole('button', { name: 'Create project' }).click();
     await expect(project).toHaveValue('workspace-sample');
@@ -179,7 +179,7 @@ test('failed project creation preserves the active project and keeps the dialog 
   });
   const project = page.getByLabel('Active project');
   await project.selectOption('demo');
-  await page.getByRole('button', { name: 'New project' }).click();
+  await page.getByRole('button', { name: 'New project', exact: true }).click();
   await page.getByLabel('Project name').fill('Broken Sample');
   await page.getByRole('button', { name: 'Create project' }).click();
   await expect(project).toHaveValue('demo');

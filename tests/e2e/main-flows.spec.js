@@ -20,11 +20,11 @@ test('home: new project dialog cancel and create, mission toggle, build starts',
   test.setTimeout(45_000);
   const problems = guard(page);
   await page.goto('/');
-  await page.getByRole('button', { name: 'New project' }).click();
+  await page.getByRole('button', { name: 'New project', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'New project' })).toBeVisible();
   await page.getByRole('button', { name: 'Cancel' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('button', { name: 'New project' }).click();
+  await page.getByRole('button', { name: 'New project', exact: true }).click();
   await page.getByLabel('Project name').fill(`Flow ${Date.now().toString(36)}`);
   await page.getByRole('button', { name: 'Create project' }).click();
   await expect(page.getByText(/Project created:/)).toBeVisible();
@@ -66,7 +66,7 @@ test('chat: send, new chat, archived toggle', async ({ page }) => {
   await page.getByLabel('New message').fill('Say hello');
   await page.getByRole('button', { name: 'Send' }).click();
   await expect(page.locator('.message-assistant').last()).not.toHaveText(/Thinking/);
-  await page.getByRole('button', { name: 'New chat' }).click();
+  await page.getByRole('button', { name: 'New chat', exact: true }).click();
   await expect(page.getByText(/Start a conversation/)).toBeVisible();
   await page.getByRole('button', { name: 'Archived', exact: true }).click();
   await page.getByRole('button', { name: 'Back to chats' }).click();
@@ -118,7 +118,7 @@ test('server failures show a friendly message, never the raw error', async ({ pa
     ? route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'KeyError: internal_table_xyz' }) })
     : route.continue()));
   await page.goto('/');
-  await page.getByRole('button', { name: 'New project' }).click();
+  await page.getByRole('button', { name: 'New project', exact: true }).click();
   await page.getByLabel('Project name').fill('Will fail');
   await page.getByRole('button', { name: 'Create project' }).click();
   await expect(page.getByRole('alert')).toContainText('Something went wrong on our side. Please try again in a moment.');

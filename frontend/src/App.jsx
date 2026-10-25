@@ -159,6 +159,8 @@ export default function App() {
   const [projectName, setProjectName] = useState('');
   const [chatStore] = useState(() => createChatStore(browserStorage()));
   const [homeReply, setHomeReply] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => { try { return globalThis.localStorage?.getItem('fw.sidebar') === 'collapsed'; } catch { return false; } });
+  function toggleSidebar() { setSidebarCollapsed((v) => { try { globalThis.localStorage?.setItem('fw.sidebar', v ? 'open' : 'collapsed'); } catch { /* storage optional */ } return !v; }); }
   const [chats, setChats] = useState(() => chatStore.getChats());
   const [activeChatId, setActiveChatId] = useState(() => getInitialChatId(chatStore));
   const activeChatIdRef = useRef(activeChatId);
@@ -447,6 +449,7 @@ export default function App() {
       msgs: nextMessages,
       pinned: existing?.pinned === true,
       archived: existing?.archived === true,
+      project: existing?.project || project,
     });
   }
 
@@ -648,14 +651,35 @@ export default function App() {
   const allConnectors = Array.isArray(connectors) ? connectors : [];
 
   return (
-    <div className="workspace-shell" data-theme={settingsPreferences.appearance_preset || 'auto'} data-appearance-style={settingsPreferences.appearance_style || 'flat'}>
+    <div className={`workspace-shell${sidebarCollapsed ? ' sidebar-collapsed' : ''}`} data-theme={settingsPreferences.appearance_preset || 'auto'} data-appearance-style={settingsPreferences.appearance_style || 'flat'}>
       <aside className="sidebar" aria-label="Free way workspace">
         <a className="brand" href="#home" onClick={(event) => { event.preventDefault(); go('Home'); }} aria-label="Free way home"><img src="/icon.svg" alt="" width="34" height="34" /><span>Free way</span></a>
+        <button type="button" className="sidebar-toggle" aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebarCollapsed} onClick={toggleSidebar}>{sidebarCollapsed ? '»' : '«'}</button>
+        <div className="sidebar-actions">
+          <button type="button" className="sidebar-action" aria-label="Start a new chat" onClick={() => { startNewChat(); go('Chat'); }}><span aria-hidden="true">+</span><span className="sidebar-label">New chat</span></button>
+          <button type="button" className="sidebar-action" aria-label="Start a new project" onClick={() => setProjectDialog(true)}><span aria-hidden="true">▣</span><span className="sidebar-label">New project</span></button>
+        </div>
         <p className="nav-caption">Workspace</p>
         <nav className="side-nav" aria-label="Primary navigation">
           {sections.map((section) => <button className={`nav-item ${view === section ? 'is-current' : ''}`} type="button" aria-current={view === section ? 'page' : undefined} onClick={() => go(section)} key={section}><SectionIcon name={section} /><span>{section}</span></button>)}
         </nav>
-        <div className="sidebar-footer"><span className="local-dot" aria-hidden="true" /><span>Local workspace</span></div>
+        <section className="sidebar-projects" aria-label="Projects">
+          <p className="nav-caption">Projects</p>
+          {[{ id: 'demo', name: 'Free way' }, ...projects.filter((item) => item.id !== 'demo')].map((item) => {
+            const projectChats = activeChats.filter((chat) => (chat.project || 'demo') === item.id);
+            const current = item.id === project;
+            return <div className={`sidebar-project${current ? ' is-current' : ''}`} key={item.id}>
+              <button type="button" className="sidebar-project-name" aria-current={current ? 'true' : undefined} onClick={() => chooseProject(item.id)}>{item.name || item.id}<span className="sidebar-count">{projectChats.length}</span></button>
+              {current && <ul className="sidebar-chats" aria-label={`Chats in ${item.name || item.id}`}>
+                {projectChats.length === 0 ? <li className="sidebar-empty">No chats yet</li> : projectChats.slice(0, 30).map((chat) => <li key={chat.id}><button type="button" className={`sidebar-chat${chat.id === activeChatId ? ' is-current' : ''}`} onClick={() => { selectChat(chat.id); go('Chat'); }}>{chat.title || 'Untitled chat'}</button></li>)}
+              </ul>}
+            </div>;
+          })}
+        </section>
+        <div className="sidebar-footer">
+          <button type="button" className="profile-button" aria-label="Profile" onClick={() => go('Me')}>P</button>
+          <div className="sidebar-session"><span><span className="local-dot" aria-hidden="true" /> {config?.mode === 'cloud' ? 'Cloud workspace' : 'Local workspace'}</span><small>{agents.length} sessions · {activeChats.length} chats</small></div>
+        </div>
       </aside>
 
       <main id="main" className="main-view" tabIndex={-1}>
