@@ -1,0 +1,23 @@
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --canvas: #0b0b0c;
+  --sidebar: #0e1015;
+  --surface: #12141b;
+  --surface-raised: #191c25;
+  --line: #272b36;
+  --text: #ececf2;
+  --muted: #a1a6b5;
+  --faint: #747c8e;
+  --accent: #00e5ff;
+  --accent-soft: #2a1630;
+  --good: #86d8b3;
+  --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 18px;
+}

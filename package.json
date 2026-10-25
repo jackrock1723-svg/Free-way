@@ -1,0 +1,20 @@
+{
+  "name": "freecode-react-candidate",
+  "version": "18.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:e2e": "node tests/e2e/run-playwright.js",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.5"
+  }
+}

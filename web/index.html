@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-theme="midnight" data-density="comfortable">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07080b">
+<title>Free way</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link id="fontcss" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/app.css?v=18">
+</head>
+<body>
+<div id="netbar" class="netbar" role="status" aria-live="polite" hidden><span class="pulse" aria-hidden="true"></span>Reconnecting… your run keeps going on the server</div>
+<a class="skip" href="#main">Skip to content</a>
+<div id="app" class="app">
+  <nav class="rail" aria-label="Primary">
+    <button class="logo" data-go="home" aria-label="Free way home"><svg class="fcmark" viewBox="0 0 64 64" aria-hidden="true"><path d="M19 48V16h25M19 31h15M34 31l12 17"/></svg></button>
+    <button data-go="home" aria-label="Home" title="Home"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg></button>
+    <button data-go="board" aria-label="Agent board" title="Board"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+    <button data-go="settings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button data-go="apps" aria-label="Connected apps" title="Connected apps"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M17.5 14v7M14 17.5h7"/></svg></button>
+    <button data-go="chat" aria-label="Chat and research" title="Chat and research"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+    <button data-go="preview" aria-label="Preview" title="Preview"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <span class="grow"></span>
+    <button type="button" class="rail-avatar" id="rail-avatar" data-act="profile" aria-label="Account" title="Account">P</button>
+  </nav>
+  <aside class="side" aria-label="Projects and agents">
+    <div class="side-h"><span class="brand"><svg class="fcmark" viewBox="0 0 64 64" aria-hidden="true"><path d="M19 48V16h25M19 31h15M34 31l12 17"/></svg>Free way</span><button type="button" class="ib side-search" id="sidesearch" data-act="palette" aria-label="Search" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button></div>
+    <div class="side-quick">
+      <button class="btn ghost full side-row" data-go="home" id="newchat"><svg viewBox="0 0 24 24"><path d="M12 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6"/><path d="M18.5 3.5a2.1 2.1 0 0 1 3 3L12 16l-4 1 1-4z"/></svg><span>New chat</span></button>
+      <button type="button" class="side-row" id="side-daily" data-act="dailyhours"><svg viewBox="0 0 24 24"><path d="M6 2h12M6 22h12M7 2v4l5 6-5 6v4M17 2v4l-5 6 5 6v4"/></svg><span>Daily hours</span><span class="side-pill" id="daily-pill">5 hrs</span></button>
+      <button type="button" class="side-row" id="side-wallet" data-act="wallet"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12.5h.01M3 10h18"/></svg><span>Wallet</span><span class="side-pill" id="wallet-pill">4 hrs</span></button>
+      <button type="button" class="side-row promo" id="side-promo" data-act="upgrade"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span>Get 7x usage for $5</span></button>
+    </div>
+    <div class="side-label">Projects</div>
+    <details class="side-tree" id="projtree" open>
+      <summary class="side-folder"><svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg><svg viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/></svg><span>.freecode</span></summary>
+      <div id="sidelist" class="sidelist"></div>
+    </details>
+    <div class="side-label">Chats</div>
+    <div id="sidechats" class="sidelist sidechats"></div>
+    <div class="side-foot" id="side-foot"><span>Session remaining</span><span class="mono" id="session-timer">47:53</span></div>
+  </aside>
+  <header class="top">
+    <button class="logo m" data-go="home" aria-label="Free way home"><svg class="fcmark" viewBox="0 0 64 64" aria-hidden="true"><path d="M19 48V16h25M19 31h15M34 31l12 17"/></svg><span>Free way</span></button>
+    <div class="seg" id="modesw" role="radiogroup" aria-label="Run mode"></div>
+  </header>
+  <main id="main" class="main" tabindex="-1"></main>
+  <section class="pane" id="pane" aria-label="Preview and diff"></section>
+  <nav class="tabbar" aria-label="Sections">
+    <button data-go="home"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/></svg><span>Home</span></button>
+    <button data-go="board"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Board</span></button>
+    <button data-go="chat"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Chat</span></button>
+    <button data-go="apps"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M17.5 14v7M14 17.5h7"/></svg><span>Apps</span></button>
+    <button data-go="preview"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Preview</span></button>
+    <button data-go="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Me</span></button>
+  </nav>
+  <header id="topbar" class="topbar" aria-label="Workspace tabs"></header>
+</div>
+<div id="sheet" class="sheet-wrap" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/phone.js"></script>
+<script src="/google-signin.js"></script>
+<script src="/app.js?v=18"></script>
+</body>
+</html>

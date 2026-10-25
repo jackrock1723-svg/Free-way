@@ -1,0 +1,1 @@
+"""Isolated candidate test package."""
