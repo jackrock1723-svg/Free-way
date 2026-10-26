@@ -58,6 +58,11 @@ class DockerfileDepsTests(unittest.TestCase):
         for dep in ("pydantic", "google-auth", "psycopg[binary]"):
             self.assertIn(dep, text)
 
+    def test_dockerfile_installs_git_before_user_switch(self):
+        text = (Path(__file__).resolve().parents[2] / "Dockerfile").read_text(encoding="utf-8")
+        self.assertRegex(text, r"apt-get install -y --no-install-recommends git")
+        self.assertLess(text.index("git ca-certificates"), text.index("USER freeway"))
+
 
 if __name__ == "__main__":
     unittest.main()

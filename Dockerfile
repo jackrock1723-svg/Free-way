@@ -16,6 +16,10 @@ ENV PYTHONUNBUFFERED=1 \
     FREEWAY_HOSTED=1 \
     FREECODE_DATA=/tmp/freeway-data
 WORKDIR /app
+# git is required: every project is a git repo (created at startup for the demo project).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 # Postgres driver goes in the pydeps folder (same layout the desktop app uses);
 # pydantic is imported at startup (schema.py); google-auth verifies Google sign-in tokens.
 RUN pip install --no-cache-dir --target /app/pydeps "psycopg[binary]==3.3.6" \
