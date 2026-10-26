@@ -82,6 +82,7 @@ test('plan and action approvals stay explicit through diff and review', async ({
   await page.getByLabel('Build prompt').fill('Build a small hello page');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /^Plan approval required$/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   await page.getByRole('button', { name: 'Approve plan' }).click();
   await page.getByRole('button', { name: 'Approve action 1' }).click();
   await page.getByRole('button', { name: 'Reject action 2' }).click();
@@ -124,6 +125,7 @@ test('Preview provides refresh and in-session back/forward navigation after a co
   const externalRequests = await openOfflineWorkspace(page);
   await page.getByLabel('Build prompt').fill('Build a small hello page');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   await page.getByRole('button', { name: 'Approve plan' }).click();
   await page.getByRole('button', { name: 'Approve action 1' }).click();
   await page.getByRole('button', { name: 'Reject action 2' }).click();
@@ -201,6 +203,7 @@ test('blocked actions never expose an approval control', async ({ page }) => {
   });
   await page.getByLabel('Build prompt').fill('Add a blocked file write to index.html');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   await expect(page.getByText('pending · blocked', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Approve action 1' })).toHaveCount(0);
   expect(externalRequests).toEqual([]);

@@ -31,6 +31,7 @@ test('a question gets a chat reply with Start build, and no build starts on its 
   await expect(page.locator('.home-messages .message-assistant').last()).not.toHaveText(/Thinking/);
   expect(orchestrations).toHaveLength(0);
   await offer.click();
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   await expect(page.getByRole('heading', { name: 'Board', exact: true })).toBeVisible();
   await expect.poll(() => orchestrations.length).toBe(1);
   expect(orchestrations[0]).toMatchObject({ project: 'demo', mode: 'plan', prompt: 'what does this project do?' });
@@ -42,6 +43,7 @@ test('a clear task starts a build that stops at Plan approval required', async (
   await open(page);
   await page.getByLabel('Build prompt').fill('Add a short welcome line to index.html');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   await expect(page.getByRole('heading', { name: 'Board', exact: true })).toBeVisible();
   await expect(page.locator('.state-badge').first()).toHaveText('Plan approval required', { timeout: 60_000 });
   await idle(page);

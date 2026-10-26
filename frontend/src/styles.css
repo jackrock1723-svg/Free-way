@@ -1045,3 +1045,11 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .questions-custom { min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--canvas); color: var(--text); font: inherit; font-size: 13px; }
 .questions-custom::placeholder { color: var(--faint); opacity: 1; }
 .questions-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+/* Step 7: build run inside the Home chat thread. User bubble right-aligned with its time; assistant stays plain text. */
+.home-run { display: grid; gap: 8px; margin-top: 12px; }
+.home-run .message-user, .home-messages .message-user { justify-self: end; margin-left: auto; max-width: 80%; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 18px; }
+.home-run .message-user strong { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.message-time { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; text-align: right; }
+.home-run .progress-box { margin-top: 0; }
+.home-run-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }

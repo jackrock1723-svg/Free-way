@@ -93,6 +93,7 @@ for (const [label, preset] of [['dark', null], ['white', 'light']]) {
     await card.getByRole('button', { name: 'Skip' }).click();
     await expect.poll(() => posted.length).toBe(1);
     expect(posted[0].prompt).toBe('build a full stack website for my bakery\n\nScope answers:\n- Where should it live? In a new folder\n- Which stack should it use? Svelte');
+    await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
     await expect(page.getByRole('heading', { name: 'Board', exact: true })).toBeVisible();
     const box = page.getByRole('region', { name: 'Agent progress' });
     await expect(box.getByRole('timer')).toHaveText(/^Work(ing|ed) for (\d+m )?\d+s$/);

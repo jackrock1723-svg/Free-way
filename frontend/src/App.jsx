@@ -168,6 +168,7 @@ export default function App() {
   const [queue, setQueue] = useState([]);
   const [buildOffer, setBuildOffer] = useState(null);
   const [pendingQuestions, setPendingQuestions] = useState(null);
+  const [homeRun, setHomeRun] = useState(null);
   const chatAbortRef = useRef(null);
   const [building, setBuilding] = useState(false);
   const [projectDialog, setProjectDialog] = useState(false);
@@ -362,7 +363,9 @@ export default function App() {
         : await api.createOrchestration({ project, prompt, model, mode: mode === 'plan' ? 'plan' : (settingsPreferencesRef.current.agent_mode || 'base2'), request_id: `ui-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}` });
       setAgent(created);
       setAgents((current) => [created, ...current.filter((item) => item.id !== created.id)]);
-      setView('Board'); setDiff(null); setReview(null);
+      setDiff(null); setReview(null);
+      if (mode === 'mission') setView('Board');
+      else setHomeRun({ agentId: created.id, prompt, at: Date.now() });   // Freebuff: the run stays in the chat thread
     } catch (requestError) {
       if (isChitChatError(requestError)) { setBuilding(false); await sendChat(null, prompt, { model }); }
       else setError(errorText(requestError));
@@ -534,7 +537,7 @@ export default function App() {
     saveActiveChatId(id);
   }
 
-  function startNewChat() {
+  function startNewChat() {setHomeRun(null); 
     activeChatIdRef.current = null;
     setActiveChatId(null);
     setMessages([]);
@@ -771,10 +774,15 @@ export default function App() {
 
           {view === 'Home' && <section className="landing" aria-labelledby="welcome-title">
             <div className="landing-copy">
-              {messages.length === 0 && <><p className="eyebrow"><span aria-hidden="true" />Free way workspace</p>
+              {messages.length === 0 && !homeRun && <><p className="eyebrow"><span aria-hidden="true" />Free way workspace</p>
               <h1 id="welcome-title">Build with clear intent.</h1>
               <p className="lead">Describe a change. Review the plan. Approve each action before it runs.</p></>}
               {messages.length > 0 && <div className="messages home-messages" aria-live="polite" aria-label="Conversation">{messages.map((message, index) => <article className={`message message-${message.role}`} key={`${index}-${message.role}`}><strong>{message.role === 'user' ? 'You' : 'Free way'}</strong><p>{message.content || (message.pending ? 'Thinking…' : '')}</p></article>)}</div>}
+              {homeRun && (() => { const run = (activeAgent?.id === homeRun.agentId ? activeAgent : agents.find((item) => item.id === homeRun.agentId)) || null; return <div className="home-run" aria-label="Build run">
+                <article className="message message-user"><strong>You</strong><p>{homeRun.prompt}</p><time className="message-time" dateTime={new Date(homeRun.at).toISOString()}>{new Date(homeRun.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
+                {run?.orchestration && <ProgressBox agent={run} />}
+                {run && <div className="home-run-actions"><span className="state-badge" role="status">{statusName(run.state)}</span><button type="button" className="button button-secondary" onClick={() => { setAgent(run); setView('Board'); }}>Review plan</button></div>}
+              </div>; })()}
               {buildOffer && !chatBusy && buildOffer.chatId === activeChatId && project && messages.length > 0 && <div className="build-offer"><button type="button" className="button button-secondary" onClick={() => { const offer = buildOffer; setBuildOffer(null); runComposer({ prompt: offer.prompt, mode: 'plan', model: offer.model }); }}>Start build</button><span className="subtle">Makes a plan first. No files change until you approve.</span></div>}
               <div className="build-form">
                 <label htmlFor="active-project">Project</label>

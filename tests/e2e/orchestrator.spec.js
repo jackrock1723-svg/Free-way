@@ -33,6 +33,7 @@ test('plan agent mode from General settings runs planners only and proposes no a
     const response = await createResponse;
     expect(response.request().postDataJSON().mode).toBe('plan');
     const created = await response.json();
+    await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
     const progress = page.getByRole('region', { name: 'Specialist workflow progress' });
     await expect(progress.getByText('Planner', { exact: true })).toBeVisible({ timeout: 15_000 });
     await expect(progress.getByText('Editor', { exact: true })).toHaveCount(0);
@@ -68,6 +69,7 @@ test('specialist progress preserves parent plan approval and per-action approval
   expect(created.id).toBeTruthy();
   expect(requestId).toBeTruthy();
 
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   const progress = page.getByRole('region', { name: 'Specialist workflow progress' });
   await expect(progress).toBeVisible();
   expect(requestMode).toBe('base2');

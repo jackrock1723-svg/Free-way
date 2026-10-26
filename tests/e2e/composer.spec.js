@@ -45,6 +45,7 @@ test('Build and Plan start real orchestrations with the chosen free model', asyn
   await page.getByRole('radio', { name: 'Plan' }).check();
   await page.getByLabel('Build prompt').fill('Plan a pricing section');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   await expect(page.getByRole('heading', { name: 'Board', exact: true })).toBeVisible();
   await expect.poll(() => posted.length).toBe(1);
   expect(posted[0]).toMatchObject({ project: 'demo', mode: 'plan', model: 'craft' });

@@ -38,6 +38,7 @@ test('home: new project dialog cancel and create, mission toggle, build starts',
   await page.getByRole('button', { name: 'Dismiss error' }).click();
   await page.getByLabel('Build prompt').fill('Add a short welcome line to index.html');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
   await expect(page.getByRole('heading', { name: 'Board', exact: true })).toBeVisible();
   await expect(page.locator('.state-badge').first()).toBeVisible();
   // Leave the shared test server idle: cancel the run if specialists are still working.
