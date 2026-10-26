@@ -30,6 +30,9 @@ import AdsPrivacySettings from './features/settings/AdsPrivacySettings.jsx';
 import AdSlot from './features/ads/AdSlot.jsx';
 import Composer from './features/composer/Composer.jsx';
 import { pickFreeModels } from './features/composer/composerModel.js';
+import ProgressBox from './features/progress/ProgressBox.jsx';
+import QuestionsCard from './features/progress/QuestionsCard.jsx';
+import { mergeAnswers, scopeQuestions } from './features/progress/progressModel.js';
 
 const sections = ['Home', 'Board', 'Apps', 'Preview', 'Me', 'Settings'];  // chats live in the sidebar and on Home
 const iconPaths = {
@@ -164,6 +167,7 @@ export default function App() {
   const [composerSkill, setComposerSkill] = useState('');
   const [queue, setQueue] = useState([]);
   const [buildOffer, setBuildOffer] = useState(null);
+  const [pendingQuestions, setPendingQuestions] = useState(null);
   const chatAbortRef = useRef(null);
   const [building, setBuilding] = useState(false);
   const [projectDialog, setProjectDialog] = useState(false);
@@ -329,7 +333,7 @@ export default function App() {
     runComposer(item);
   }
 
-  async function runComposer({ prompt, mode, model, skill }) {
+  async function runComposer({ prompt, mode, model, skill, skipQuestions }) {
     if (mode === 'skills') {   // existing skills endpoint: the skill text rides along as file context on the normal chat backend
       try {
         const detail = await api.request(`/api/settings/skills/${encodeURIComponent(skill)}`);
@@ -349,6 +353,8 @@ export default function App() {
       setBuildOffer({ chatId: activeChatIdRef.current, prompt, model });
       return;
     }
+    const questions = mode === 'build' && !skipQuestions ? scopeQuestions(prompt) : [];
+    if (questions.length) { setPendingQuestions({ prompt, model, questions }); return; }   // large request: ask first, build nothing yet
     setBuilding(true); setError(''); setNotice('');
     try {
       const created = mode === 'mission'
@@ -777,6 +783,7 @@ export default function App() {
                   : <div className="project-row"><select id="active-project" aria-label="Active project" value={project} onChange={(event) => chooseProject(event.target.value)}>{!project && <option value="">Choose a project</option>}{realProjects.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>}
               </div>
               {!chatBusy && messages.length > 1 && messages[messages.length - 1]?.role === 'assistant' && !messages[messages.length - 1]?.pending && <AdSlot variant="strip" placement="chat" project={project} context={messages.filter((m) => m.role === 'user').slice(-2).map((m) => m.content).join(' ')} runKey={`home-${activeChatId || ''}-${messages.length}`} />}
+              {pendingQuestions && <QuestionsCard key={pendingQuestions.prompt} questions={pendingQuestions.questions} onDone={(answers) => { const item = pendingQuestions; setPendingQuestions(null); runComposer({ prompt: mergeAnswers(item.prompt, item.questions, answers), mode: 'build', model: item.model, skipQuestions: true }); }} />}
               <Composer value={buildPrompt} onChange={setBuildPrompt} onSubmit={buildTask} onStop={stopComposer} busy={composerBusy} stoppable={chatBusy || activeAgent?.state === 'orchestrating'} queued={queue.length}
                 mode={composerMode} onMode={setComposerMode} models={freeModels} model={composerModel} onModel={setComposerModel}
                 skills={skillsList.skills} skill={composerSkill} onSkill={setComposerSkill} skillsReason={skillsList.reason}
@@ -789,6 +796,7 @@ export default function App() {
             {!activeAgent ? <p className="empty-state">No agent sessions yet. Start a build from Home.</p> : <div className="agent-panel"><div className="agent-title-row"><div><p className="eyebrow">{activeAgent.project || project}</p><h2>{activeAgent.title || activeAgent.prompt || 'Build session'}</h2></div><span className="state-badge" role="status">{statusName(activeAgent.state)}</span></div>
               <div className="agent-meta"><span>Model: {activeAgent.model || 'auto'}</span><span>State: {activeAgent.state}</span>{activeAgent.checks && <span>Checks: {activeAgent.checks}</span>}</div>
               <DetectedRuntimes projectId={activeAgent.project || project} />
+              {activeAgent.orchestration && <ProgressBox agent={activeAgent} />}
               {activeAgent.orchestration && <section className="specialist-progress" aria-label="Specialist workflow progress"><h3>Specialist workflow</h3><p className="subtle">One bounded specialist runs at a time. No proposed action is applied until you approve the parent plan and that action.</p><ol>{activeAgent.orchestration.children.map((child) => <li className={`specialist-step specialist-${child.status}`} key={child.role}><div className="specialist-step-heading"><strong>{SPECIALIST_LABELS[child.role] || child.role}</strong><span className="subtle">{SPECIALIST_STATUS[child.status] || child.status}</span></div><p>{SPECIALIST_DESCRIPTIONS[child.role] || 'Bounded specialist step.'}</p>{child.result?.summary && <p>{child.result.summary}</p>}{child.result?.findings?.length > 0 && <ul>{child.result.findings.map((finding, index) => <li key={`${child.role}-${index}`}>{finding}</li>)}</ul>}{child.error && <p className="error-text">{child.error}</p>}</li>)}</ol>{activeAgent.state === 'orchestrating' && <button className="button button-secondary" type="button" onClick={cancelOrchestration}>Cancel specialist workflow</button>}{activeAgent.orchestration.error && <p className="error-text">{activeAgent.orchestration.error}</p>}</section>}
               {activeAgent.plan && <div className="plan-block"><h3>Plan</h3><p>{activeAgent.plan.summary}</p><ol>{(activeAgent.plan.steps || []).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol></div>}
               {activeAgent.state === 'needs_plan_approval' && <div className="approval-block"><p>Plan approval required. No action has started.</p><button className="button button-primary" type="button" onClick={approvePlan}>Approve plan</button><p className="subtle">Approval uses ask mode; each eligible action will still wait for its own decision.</p></div>}

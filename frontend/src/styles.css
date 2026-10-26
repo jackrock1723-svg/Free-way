@@ -1015,3 +1015,33 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 @media (max-width: 640px) { .composer { border-radius: 18px; } .composer-select { max-width: 150px; } }
 .workspace-shell[data-theme="light"] .approval-block > p:first-child { color: #4b3fa0; }
 .build-offer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 8px 0 4px; font-size: 12px; }
+
+/* Step 6: progress box and clarifying questions card (theme tokens; radii 8/18/24). */
+.progress-box { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
+.progress-head { margin: 0 0 6px; color: var(--text); font-size: 13px; font-weight: 500; }
+.progress-line { margin: 8px 0 4px; color: var(--muted); font-size: 13px; }
+.progress-step { margin: 2px 0; border-radius: 8px; }
+.progress-step summary { display: flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px; border-radius: 8px; color: var(--text); font-size: 13px; cursor: pointer; list-style: none; }
+.progress-step summary::-webkit-details-marker { display: none; }
+.progress-step summary:hover, .progress-step summary:focus-visible { background: var(--surface-raised); }
+.progress-chevron { display: inline-block; width: 12px; color: var(--muted); transition: transform .15s; }
+.progress-step[open] .progress-chevron { transform: rotate(90deg); }
+.progress-step ul, .progress-step p { margin: 4px 0 8px 24px; color: var(--muted); font-size: 12px; }
+.progress-failed summary { color: var(--text); text-decoration: underline wavy var(--accent); }
+.questions-card { width: 100%; max-width: 720px; margin: 14px auto 0; padding: 14px; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); }
+.questions-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.questions-head p { margin: 0; color: var(--text); font-size: 14px; }
+.questions-pager { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+.questions-arrow { width: 28px; height: 28px; min-height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); color: var(--text); cursor: pointer; }
+.questions-arrow:disabled { color: var(--muted); cursor: not-allowed; }
+.questions-options { display: grid; gap: 6px; margin: 10px 0 0; padding: 0; border: 0; }
+.questions-options legend { margin-bottom: 8px; color: var(--text); font-size: 14px; font-weight: 500; }
+.questions-option { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-raised); cursor: pointer; }
+.questions-option.is-chosen { border-color: var(--accent); background: var(--accent-soft); }
+.questions-option input { margin-top: 3px; accent-color: var(--accent); }
+.questions-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--text); font-size: 13px; font-weight: 500; }
+.questions-desc { display: block; color: var(--muted); font-size: 12px; }
+.questions-badge { padding: 0 6px; border: 1px solid var(--accent); border-radius: 999px; color: var(--text); font-size: 11px; font-weight: 500; }
+.questions-custom { min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--canvas); color: var(--text); font: inherit; font-size: 13px; }
+.questions-custom::placeholder { color: var(--faint); opacity: 1; }
+.questions-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
