@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 async function openSettings(page, section) {
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: section, exact: true }).click();
+  await page.getByRole('navigation', { name: 'Settings sections' }).getByRole('button', { name: section, exact: true }).click();
   await expect(page.getByRole('heading', { name: section, exact: true })).toBeVisible();
 }
 

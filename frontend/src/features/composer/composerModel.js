@@ -3,7 +3,7 @@
 export const COMPOSER_MODEL_IDS = ['auto', 'forge', 'flux', 'atlas', 'craft', 'spark', 'lite'];
 
 export const COMPOSER_MODES = [
-  { value: 'build', label: 'Build', help: 'Specialists propose changes; nothing is applied until you approve.' },
+  { value: 'build', label: 'Agent', help: 'Specialists propose changes; nothing is applied until you approve.' },
   { value: 'plan', label: 'Plan', help: 'Plan only. No files are written.' },
   { value: 'mission', label: 'Mission', help: 'Milestones with an approval at each step.' },
   { value: 'skills', label: 'Skills', help: 'Answer using one of your local skills.' },
@@ -15,7 +15,7 @@ export function pickFreeModels(list) {
 }
 
 export function composerPlaceholder(busy) {
-  return busy ? 'Type a message — added to the queue' : 'Type a message — / for commands, @ for threads or files';
+  return busy ? 'Type a message — added to the queue' : 'Ask Free way… Use / for commands';
 }
 
 export function adDomain(url) {

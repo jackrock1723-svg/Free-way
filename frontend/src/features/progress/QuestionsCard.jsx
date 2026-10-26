@@ -35,7 +35,7 @@ export default function QuestionsCard({ questions, onDone }) {
       </fieldset>
       <div className="questions-actions">
         <button type="button" className="button button-secondary" onClick={() => next(null)}>Skip</button>
-        <button type="button" className="button button-primary" onClick={() => next()}>{last ? 'Start build' : 'Next question'}</button>
+        <button type="button" className="button button-primary" onClick={() => next()}>{last ? 'Start task' : 'Next question'}</button>
       </div>
     </section>
   );

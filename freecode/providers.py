@@ -385,7 +385,7 @@ class Router:
         if self.mock is not None:
             out = self.mock.complete("mock", messages, on_delta=on_delta) if on_delta else self.mock.complete("mock", messages)
             self.log.append({"brand": brand_id, "provider": "mock", "model": "mock", "ok": True})
-            return out, {"brand": brand_id, "provider": "mock", "model": "mock", "switched": 0}
+            return out, {"brand": brand_id, "provider": "mock", "model": "mock", "switched": 0, "requested": brand_id, "name": "Demo model", "fallback": False}
         errors = []
         for n, (bid, prov, model) in enumerate(cands):
             p = self.providers.get(prov)
@@ -404,7 +404,7 @@ class Router:
                 out = p.complete(model, messages, key=self.keys.get(prov), **kw)
                 if fast: self.last_ok = (bid, prov, model)
                 self.log.append({"brand": bid, "provider": prov, "model": model, "ok": True, "ms": int((time.time()-t0)*1000)})
-                return out, {"brand": bid, "provider": prov, "model": model, "switched": n}
+                return out, dict({"brand": bid, "provider": prov, "model": model, "switched": n}, **catalog.route_info(brand_id, bid, prov, model))
             except ProviderError as e:
                 self.log.append({"brand": bid, "provider": prov, "model": model, "ok": False, "error": str(e)})
                 if emitted: raise

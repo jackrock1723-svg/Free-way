@@ -31,8 +31,8 @@ test('home: new project dialog cancel and create, mission toggle, build starts',
   await page.getByLabel('Project name').fill(`Flow ${Date.now().toString(36)}`);
   await page.getByRole('button', { name: 'Create project' }).click();
   await expect(page.getByText(/Project created:/)).toBeVisible();
-  await page.getByRole('radio', { name: 'Mission' }).check();
-  await page.getByRole('radio', { name: 'Build' }).check();
+  await page.getByLabel('Run mode').selectOption({ label: 'Mission' });
+  await page.getByLabel('Run mode').selectOption({ label: 'Agent' });
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Describe what you want built.');
   await page.getByRole('button', { name: 'Dismiss error' }).click();

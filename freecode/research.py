@@ -90,7 +90,7 @@ def answer(router, brand, messages, mode="chat", keys=None, search_fn=None, read
             prior_greets = sum(1 for m in clean[:-1] if m.get("role") == "user" and is_chitchat(m.get("content", "")))
             return {"reply": greet_reply(q, repeat=(prior_greets > 0)), "sources": [], "route": {"brand": "instant", "provider": "local", "model": "Free way instant reply", "switched": 0, "ms": 0}, "search": None}
         short = len(q.split()) <= 6 and len(clean) <= 2         # short opener: the fastest model answers it
-        args = ("lite" if short and brand in ("auto", "forge", "atlas", "craft", "flux") else brand,
+        args = ("lite" if short and brand == "auto" else brand,   # a model the user picked is always the one asked
                 prepare_outbound(clean, [{"role": "system", "content": CHAT_SYS}], additional_context))
         if on_delta:
             out, route = router.complete(*args, skill="fast", fast=True, on_delta=on_delta)

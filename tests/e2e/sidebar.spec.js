@@ -13,7 +13,16 @@ test('sidebar: new chat, projects with their chat history, open a chat, profile/
   await expect(projects.locator('.sidebar-project-name').first()).toBeVisible();
   await expect(projects.locator('.sidebar-project.is-current')).toHaveCount(1);
   await expect(side.getByRole('button', { name: 'Profile' })).toBeVisible();
-  await expect(side.locator('.sidebar-session')).toContainText(/sessions/);
+  // Freebuff browser layout: icon rail + panel with honest stat rows (no invented hour or wallet balances)
+  await expect(side.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Earn' })).toBeVisible();
+  await expect(side.locator('.fw-streak')).toContainText(/streak|No streak yet/);
+  await expect(side.locator('.fw-stat', { hasText: 'Daily hours' })).toContainText('No limit');
+  await expect(side.locator('.fw-stat', { hasText: 'Wallet' })).toContainText('Free');
+  await side.getByRole('button', { name: 'Earn' }).click();
+  await expect(page.locator('.settings-nav-item.is-current, [aria-current="page"]').filter({ hasText: 'Earn' }).first()).toBeVisible();
+  await side.getByRole('button', { name: 'Free models & limits' }).click();
+  await expect(page.locator('.settings-nav-item.is-current, [aria-current="page"]').filter({ hasText: 'Billing' }).first()).toBeVisible();
+  await side.getByRole('button', { name: 'Home', exact: true }).click();
 
   // New chat -> send a message -> it shows under the current project and reopens from the sidebar
   await side.getByRole('button', { name: 'Start a new chat' }).click();
@@ -25,6 +34,14 @@ test('sidebar: new chat, projects with their chat history, open a chat, profile/
   await item.click();
   await expect(page.getByRole('region', { name: 'Conversation' }).or(page.locator('.home-messages'))).toContainText('hello there');
   await expect(item).toHaveClass(/is-current/);
+
+  // Search filters the chat lists by title
+  await side.getByRole('button', { name: 'Search chats' }).click();
+  await side.getByRole('searchbox', { name: 'Search chats' }).fill('zzz-no-match');
+  await expect(projects.locator('.sidebar-chat', { hasText: 'hello there' })).toHaveCount(0);
+  await side.getByRole('searchbox', { name: 'Search chats' }).fill('hello');
+  await expect(projects.locator('.sidebar-chat', { hasText: 'hello there' })).toBeVisible();
+  await side.getByRole('button', { name: 'Search chats' }).click();
 
   // New project opens the existing dialog
   await side.getByRole('button', { name: 'Start a new project' }).click();

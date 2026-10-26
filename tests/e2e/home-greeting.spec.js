@@ -6,11 +6,11 @@ test('Home is the chat screen: no demo default, no status panel, heading hides o
   await page.goto('/');
   // No sample project is auto-selected; only a New project prompt when the user has none.
   await expect(page.getByRole('combobox', { name: 'Active project' })).toHaveCount(0);
-  await expect(page.getByText('Create your first project to start building')).toBeVisible();
+  await expect(page.getByText('Create a project so Free way can change files')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('fc.project'))).toBeNull();
   await expect(page.getByRole('complementary', { name: 'Workspace status' })).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Chat', exact: true })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Build with clear intent.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Free way', exact: true })).toBeVisible();
 
   // A greeting becomes a conversation on Home; the heading disappears.
   await page.getByLabel('Build prompt').fill('hi');
@@ -18,12 +18,12 @@ test('Home is the chat screen: no demo default, no status panel, heading hides o
   const convo = page.locator('.home-messages');
   await expect(convo).toContainText('hi');
   await expect(convo.locator('.message-assistant p')).not.toHaveText(/^(Thinking\u2026)?$/, { timeout: 20_000 });
-  await expect(page.getByRole('heading', { name: 'Build with clear intent.' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Free way', exact: true })).toHaveCount(0);
   await expect(page.getByRole('alert')).toHaveCount(0);
 
   // New chat brings the heading back; the earlier chat reopens from the sidebar history.
   await page.getByRole('button', { name: 'Start a new chat' }).click();
-  await expect(page.getByRole('heading', { name: 'Build with clear intent.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Free way', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   await page.locator('.chat-history-open', { hasText: 'hi' }).first().click();
   await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Home', exact: true }).click();

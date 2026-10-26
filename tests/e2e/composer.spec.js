@@ -24,10 +24,11 @@ async function idle(page) {
 test('composer layout: modes, free models only, location label, honest + button', async ({ page }) => {
   await open(page);
   const box = page.getByRole('form', { name: 'Composer' });
-  await expect(box).toHaveCSS('border-top-left-radius', '24px');
-  await expect(page.getByLabel('Build prompt')).toHaveAttribute('placeholder', 'Type a message — / for commands, @ for threads or files');
-  await expect(page.getByRole('radio', { name: 'Build' })).toBeChecked();
-  for (const name of ['Plan', 'Mission', 'Skills']) await expect(page.getByRole('radio', { name })).toHaveCount(1);
+  await expect(box).toHaveCSS('border-top-left-radius', '18px');
+  await expect(page.getByLabel('Build prompt')).toHaveAttribute('placeholder', 'Ask Free way… Use / for commands');
+  await expect(page.getByLabel('Run mode')).toHaveValue('build');
+  await expect(page.getByLabel('Run mode').locator('option:checked')).toHaveText('Agent');
+  for (const name of ['Plan', 'Mission', 'Skills']) await expect(page.getByLabel('Run mode').locator('option', { hasText: name })).toHaveCount(1);
   const names = await page.getByLabel('Model').locator('option').allTextContents();
   expect(names).toEqual(['Free way Auto', 'GLM 5.3', 'DeepSeek V4.1 Flash', 'Nemotron 3 Ultra', 'Laguna S 2.1', 'MiniMax M3.1 Flash', 'Nemotron 3.5 Lightning']);
   const plus = page.getByRole('button', { name: 'Attach file' });
@@ -42,7 +43,7 @@ test('Build and Plan start real orchestrations with the chosen free model', asyn
   const posted = [];
   page.on('request', (r) => { if (new URL(r.url()).pathname === '/api/orchestrations' && r.method() === 'POST') posted.push(r.postDataJSON()); });
   await page.getByLabel('Model').selectOption('craft');
-  await page.getByRole('radio', { name: 'Plan' }).check();
+  await page.getByLabel('Run mode').selectOption({ label: 'Plan' });
   await page.getByLabel('Build prompt').fill('Plan a pricing section');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await page.getByRole('button', { name: 'Review plan' }).click();   // step 7: the run stays in the Home chat
@@ -51,7 +52,7 @@ test('Build and Plan start real orchestrations with the chosen free model', asyn
   expect(posted[0]).toMatchObject({ project: 'demo', mode: 'plan', model: 'craft' });
   await idle(page);
   await page.getByRole('button', { name: 'Home', exact: true }).first().click();
-  await page.getByRole('radio', { name: 'Build' }).check();
+  await page.getByLabel('Run mode').selectOption({ label: 'Agent' });
   await page.getByLabel('Build prompt').fill('Add a short welcome line to index.html');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect.poll(() => posted.length).toBe(2);
@@ -63,7 +64,7 @@ test('Build and Plan start real orchestrations with the chosen free model', asyn
 test('Mission uses the existing mission flow', async ({ page }) => {
   await open(page, 'demo');
   const req = page.waitForRequest((r) => new URL(r.url()).pathname === '/api/agents' && r.method() === 'POST');
-  await page.getByRole('radio', { name: 'Mission' }).check();
+  await page.getByLabel('Run mode').selectOption({ label: 'Mission' });
   await page.getByLabel('Build prompt').fill('Create a mission workspace');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   expect((await req).postDataJSON()).toMatchObject({ project: 'demo', mission: true });
@@ -76,7 +77,7 @@ test('Skills sends the chosen skill text with the chat request', async ({ page }
   await page.route('**/api/settings/skills/tidy', (route) => route.fulfill({ json: { available: true, skill: { id: 'tidy', name: 'Tidy', description: 'd', source: 'local', instructions: 'Always answer in one line.' } } }));
   await open(page);
   const req = page.waitForRequest((r) => new URL(r.url()).pathname.startsWith('/api/chat') && r.method() === 'POST');
-  await page.getByRole('radio', { name: 'Skills' }).check();
+  await page.getByLabel('Run mode').selectOption({ label: 'Skills' });
   await expect(page.getByLabel('Skill', { exact: true })).toHaveValue('tidy');
   await page.getByLabel('Build prompt').fill('hello');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
@@ -87,8 +88,8 @@ test('Skills sends the chosen skill text with the chat request', async ({ page }
 test('Skills is disabled with a reason when no skills exist', async ({ page }) => {
   await page.route('**/api/settings/skills', (route) => route.fulfill({ json: { available: false, reason: 'No local skills source is configured.', skills: [] } }));
   await open(page);
-  await expect(page.getByRole('radio', { name: 'Skills' })).toBeDisabled();
-  await expect(page.locator('.composer-mode', { hasText: 'Skills' })).toHaveAttribute('title', 'No local skills source is configured.');
+  await expect(page.getByLabel('Run mode').locator('option[value="skills"]')).toBeDisabled();
+  await expect(page.getByLabel('Run mode').locator('option[value="skills"]')).toHaveAttribute('title', 'No local skills source is configured.');
 });
 
 test('busy composer queues messages in order, Send turns into Stop and Stop aborts', async ({ page }) => {
@@ -109,7 +110,7 @@ test('busy composer queues messages in order, Send turns into Stop and Stop abor
   await input.press('Enter');
   await expect(page.getByText('1 queued')).toBeVisible();
   await page.getByRole('button', { name: 'Stop' }).click();
-  await expect(page.getByText('Stopped.')).toBeVisible();
+  await expect(page.locator('.fw-meta.is-stopped')).toHaveText('Stopped');
   await expect.poll(() => sent, { timeout: 10_000 }).toEqual(['first', 'second']);
   await expect(page.getByText('1 queued')).toHaveCount(0);
 });
@@ -124,7 +125,7 @@ test('ad strip sits above the composer with the Freebuff sizes and closes', asyn
   await expect(strip).toBeVisible({ timeout: 15_000 });
   const [s, c] = [await strip.boundingBox(), await page.getByRole('form', { name: 'Composer' }).boundingBox()];
   expect(s.y + s.height).toBeLessThanOrEqual(c.y);
-  expect(s.width).toBeLessThanOrEqual(720);
+  expect(s.width).toBeLessThanOrEqual(760);
   await expect(page.locator('.ad-strip-icon')).toHaveCSS('width', '16px');
   await expect(page.locator('.ad-strip-title')).toHaveCSS('font-size', '13px');
   await expect(page.locator('.ad-strip-line')).toHaveCSS('font-size', '12px');

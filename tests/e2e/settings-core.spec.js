@@ -261,7 +261,7 @@ test('keyboard shortcuts expose every documented action, reject collisions, rese
   for (const [label, chord] of SHORTCUT_ROWS) {
     const row = page.getByRole('row', { name: new RegExp(label, 'i') });
     await expect(row).toContainText(chord);
-    if (label === 'Open settings') {
+    if (['Open settings', 'Toggle left sidebar', 'Toggle bottom terminal'].includes(label)) {
       await expect(row.getByRole('button', { name: /Change shortcut/i })).toBeEnabled();
     } else {
       await expect(row.getByRole('button', { name: /Change shortcut/i })).toBeDisabled();

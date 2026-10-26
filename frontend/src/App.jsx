@@ -32,6 +32,12 @@ import Composer from './features/composer/Composer.jsx';
 import { pickFreeModels } from './features/composer/composerModel.js';
 import ProgressBox from './features/progress/ProgressBox.jsx';
 import QuestionsCard from './features/progress/QuestionsCard.jsx';
+import IconRail from './features/sidebar/IconRail.jsx';
+import { routeLabel } from './features/chat/routeLabel.js';
+import LeftPanel from './features/sidebar/LeftPanel.jsx';
+import TopToggles from './features/workspace/TopToggles.jsx';
+import TerminalPanel from './features/workspace/TerminalPanel.jsx';
+import SplitPane from './features/chat/SplitPane.jsx';
 import { mergeAnswers, scopeQuestions } from './features/progress/progressModel.js';
 
 const sections = ['Home', 'Board', 'Preview', 'Me', 'Settings'];  // Apps hidden: status-only, no connect actions (see Settings > Integrations)  // chats live in the sidebar and on Home
@@ -176,6 +182,8 @@ export default function App() {
   const [chatStore] = useState(() => createChatStore(browserStorage()));
   const [homeReply, setHomeReply] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => { try { return globalThis.localStorage?.getItem('fw.sidebar') === 'collapsed'; } catch { return false; } });
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
   function toggleSidebar() { setSidebarCollapsed((v) => { try { globalThis.localStorage?.setItem('fw.sidebar', v ? 'open' : 'collapsed'); } catch { /* storage optional */ } return !v; }); }
   const [chats, setChats] = useState(() => chatStore.getChats());
   const [activeChatId, setActiveChatId] = useState(() => getInitialChatId(chatStore));
@@ -388,7 +396,7 @@ export default function App() {
 
   useEffect(() => {
     let live = true;
-    api.request('/api/models').then((list) => { const free = pickFreeModels(list); if (live && free.length) setFreeModels(free); }).catch(() => {});
+    api.request('/api/models').then((list) => { const free = pickFreeModels(list); if (live && free.length) { setFreeModels(free); setComposerModel((current) => (free.find((m) => m.id === current)?.available === false ? 'auto' : current)); } }).catch(() => {});
     api.request('/api/settings/skills').then((result) => {
       if (!live) return;
       const skills = Array.isArray(result?.skills) ? result.skills : [];
@@ -658,7 +666,7 @@ export default function App() {
           persistChatMessages(chatId, nextMessages);
         },
         onComplete: (result) => {
-          const completedMessages = [...outgoingMessages, { role: 'assistant', content: buffer.value || result?.reply || 'The reply was empty.' }];
+          const completedMessages = [...outgoingMessages, { role: 'assistant', content: buffer.value || result?.reply || 'The reply was empty.', ...(result?.route ? { route: result.route } : {}) }];
           if (activeChatIdRef.current === chatId) setMessages(completedMessages);
           persistChatMessages(chatId, completedMessages);
         },
@@ -667,7 +675,7 @@ export default function App() {
     } catch (streamError) {
       const stopped = controller.signal.aborted;
       if (!stopped) setError(errorText(streamError));
-      const failedMessages = [...outgoingMessages, { role: 'assistant', content: buffer.value || (stopped ? 'Stopped.' : 'The reply stopped before completion.') }];
+      const failedMessages = [...outgoingMessages, { role: 'assistant', content: buffer.value || (stopped ? 'Stopped.' : 'The reply stopped before completion.'), ...(stopped ? { stopped: true } : {}) }];
       if (activeChatIdRef.current === chatId) setMessages(failedMessages);
       persistChatMessages(chatId, failedMessages);
     } finally { setChatBusy(false); if (chatAbortRef.current === controller) chatAbortRef.current = null; }
@@ -710,6 +718,19 @@ export default function App() {
     }
   }
 
+  const sidebarShortcut = settingsPreferences.keyboard_shortcuts?.toggle_sidebar || DEFAULT_SHORTCUTS.toggle_sidebar;
+  const terminalShortcut = settingsPreferences.keyboard_shortcuts?.toggle_terminal || DEFAULT_SHORTCUTS.toggle_terminal;
+  useEffect(() => {
+    function handleLayoutShortcut(event) {
+      if (event.defaultPrevented) return;
+      const chord = shortcutFromEvent(event);
+      if (chord && chord === sidebarShortcut) { event.preventDefault(); toggleSidebar(); }
+      else if (chord && chord === terminalShortcut) { event.preventDefault(); setTerminalOpen((open) => !open); }
+    }
+    window.addEventListener('keydown', handleLayoutShortcut);
+    return () => window.removeEventListener('keydown', handleLayoutShortcut);
+  }, [sidebarShortcut, terminalShortcut]);
+
   const openSettingsShortcut = settingsPreferences.keyboard_shortcuts?.open_settings || DEFAULT_SHORTCUTS.open_settings;
   useEffect(() => {
     function handleSettingsShortcut(event) {
@@ -731,40 +752,17 @@ export default function App() {
   return (
     <div className={`workspace-shell${sidebarCollapsed ? ' sidebar-collapsed' : ''}`} data-theme={settingsPreferences.appearance_preset || 'auto'} data-appearance-style={settingsPreferences.appearance_style || 'flat'}>
       <aside className="sidebar" aria-label="Free way workspace">
-        <a className="brand" href="#home" onClick={(event) => { event.preventDefault(); go('Home'); }} aria-label="Free way home"><img src="/icon.svg" alt="" width="34" height="34" /><span>Free way</span></a>
-        <button type="button" className="sidebar-toggle" aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebarCollapsed} onClick={toggleSidebar}>{sidebarCollapsed ? '»' : '«'}</button>
-        <div className="sidebar-actions">
-          <button type="button" className="sidebar-action" aria-label="Start a new chat" onClick={() => { startNewChat(); go('Home'); }}><span aria-hidden="true">+</span><span className="sidebar-label">New chat</span></button>
-          <button type="button" className="sidebar-action" aria-label="Start a new project" onClick={() => setProjectDialog(true)}><span aria-hidden="true">▣</span><span className="sidebar-label">New project</span></button>
-        </div>
-        <p className="nav-caption">Workspace</p>
-        <nav className="side-nav" aria-label="Primary navigation">
-          {sections.map((section) => <button className={`nav-item ${view === section ? 'is-current' : ''}`} type="button" aria-current={view === section ? 'page' : undefined} onClick={() => go(section)} key={section}><SectionIcon name={section} /><span>{section}</span></button>)}
-        </nav>
-        <section className="sidebar-projects" aria-label="Projects">
-          <p className="nav-caption">Projects</p>
-          {realProjects.length === 0 && <p className="sidebar-empty">No projects yet</p>}
-          {realProjects.map((item) => {
-            const projectChats = activeChats.filter((chat) => (chat.project || '') === item.id);
-            const current = item.id === project;
-            return <div className={`sidebar-project${current ? ' is-current' : ''}`} key={item.id}>
-              <button type="button" className="sidebar-project-name" aria-current={current ? 'true' : undefined} onClick={() => chooseProject(item.id)}>{item.name || item.id}<span className="sidebar-count">{projectChats.length}</span></button>
-              {current && <ul className="sidebar-chats" aria-label={`Chats in ${item.name || item.id}`}>
-                {projectChats.length === 0 ? <li className="sidebar-empty">No chats yet</li> : projectChats.slice(0, 30).map((chat) => <li key={chat.id}><button type="button" className={`sidebar-chat${chat.id === activeChatId ? ' is-current' : ''}`} onClick={() => { selectChat(chat.id); go('Home'); }}>{chat.title || 'Untitled chat'}</button></li>)}
-              </ul>}
-            </div>;
-          })}
-          {activeChats.some((chat) => !chat.project || !realProjects.some((item) => item.id === chat.project)) && <button type="button" className="sidebar-project-name" onClick={() => go('Chat')}>Other chats<span className="sidebar-count">{activeChats.filter((chat) => !chat.project || !realProjects.some((item) => item.id === chat.project)).length}</span></button>}
-        </section>
-        <button type="button" className="text-button sidebar-manage" onClick={() => go('Chat')}>Manage chats</button>
-        <div className="sidebar-footer">
-          <button type="button" className="profile-button" aria-label="Profile" onClick={() => go('Me')}>P</button>
-          <div className="sidebar-session"><span><span className="local-dot" aria-hidden="true" /> {config?.mode === 'cloud' ? 'Cloud workspace' : 'Local workspace'}</span><small>{agents.length} sessions · {activeChats.length} chats</small></div>
-        </div>
+        <IconRail sections={sections} view={view} settingsSection={settingsSection} collapsed={sidebarCollapsed} onToggle={toggleSidebar} Icon={SectionIcon}
+          onGo={(section) => { if (section === 'Settings' && settingsSection === 'Earn') setSettingsSection('General'); go(section); }}
+          onEarn={() => { setSettingsSection('Earn'); go('Settings'); }} onProfile={() => go('Me')} />
+        <LeftPanel projects={realProjects} chats={activeChats} project={project} activeChatId={activeChatId} mode={config?.mode}
+          onChooseProject={chooseProject} onSelectChat={(id) => { selectChat(id); go('Home'); }}
+          onNewChat={() => { startNewChat(); go('Home'); }} onNewProject={() => setProjectDialog(true)}
+          onManageChats={() => go('Chat')} onOpenPlans={() => { setSettingsSection('Billing'); go('Settings'); }} />
       </aside>
 
       <main id="main" className="main-view" tabIndex={-1}>
-        <header className="topbar"><p>{view}</p><div className="server-state" role="status"><span className="server-state-dot" aria-hidden="true" />{config?.mode === 'cloud' ? 'Cloud workspace' : 'Local server'}</div></header>
+        <header className="topbar"><div className="fw-topbar-left"><TopToggles sidebarOpen={!sidebarCollapsed} onSidebar={toggleSidebar} sidebarShortcut={sidebarShortcut} terminalOpen={terminalOpen} onTerminal={() => setTerminalOpen((open) => !open)} terminalShortcut={terminalShortcut} splitOpen={splitOpen} onSplit={view === 'Home' ? () => setSplitOpen((open) => !open) : undefined} /><p>{view}</p></div><div className="server-state" role="status"><span className="server-state-dot" aria-hidden="true" />{config?.mode === 'cloud' ? 'Cloud workspace' : 'Local server'}</div></header>
         <div className="page-content">
           <ErrorBoundary compact key={view}>
           <CrashProbe />
@@ -772,22 +770,20 @@ export default function App() {
           {notice && <p className="toast" role="status">{notice}</p>}
           {loading && <p className="loading-note" role="status">Loading workspace…</p>}
 
-          {view === 'Home' && <section className="landing" aria-labelledby="welcome-title">
+          {view === 'Home' && <section className={`landing${splitOpen ? ' is-split' : ''}`} aria-labelledby="welcome-title">
             <div className="landing-copy">
-              {messages.length === 0 && !homeRun && <><p className="eyebrow"><span aria-hidden="true" />Free way workspace</p>
-              <h1 id="welcome-title">Build with clear intent.</h1>
-              <p className="lead">Describe a change. Review the plan. Approve each action before it runs.</p></>}
-              {messages.length > 0 && <div className="messages home-messages" aria-live="polite" aria-label="Conversation">{messages.map((message, index) => <article className={`message message-${message.role}`} key={`${index}-${message.role}`}><strong>{message.role === 'user' ? 'You' : 'Free way'}</strong><p>{message.content || (message.pending ? 'Thinking…' : '')}</p></article>)}</div>}
+              {messages.length === 0 && !homeRun && <div className="fw-watermark"><h1 id="welcome-title" className="visually-hidden">Free way</h1><img src="/icon-mark.svg" alt="" width="96" height="96" /></div>}
+              {messages.length > 0 && <div className="messages home-messages" aria-live="polite" aria-label="Conversation">{messages.map((message, index) => <article className={`message message-${message.role}`} key={`${index}-${message.role}`}><strong>{message.role === 'user' ? 'You' : 'Free way'}</strong>{message.role === 'assistant' && message.stopped && <span className="fw-meta is-stopped">Stopped</span>}{message.role === 'assistant' && !message.stopped && (() => { const label = routeLabel(message.route, freeModels); return label && <span className={`fw-meta${label.fallback ? ' is-fallback' : ''}`}>{label.text}</span>; })()}{!(message.stopped && message.content === 'Stopped.') && <p>{message.content || (message.pending ? 'Thinking…' : '')}</p>}</article>)}</div>}
               {homeRun && (() => { const run = (activeAgent?.id === homeRun.agentId ? activeAgent : agents.find((item) => item.id === homeRun.agentId)) || null; return <div className="home-run" aria-label="Build run">
                 <article className="message message-user"><strong>You</strong><p>{homeRun.prompt}</p><time className="message-time" dateTime={new Date(homeRun.at).toISOString()}>{new Date(homeRun.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
                 {run?.orchestration && <ProgressBox agent={run} />}
                 {run && <div className="home-run-actions"><span className="state-badge" role="status">{statusName(run.state)}</span><button type="button" className="button button-secondary" onClick={() => { setAgent(run); setView('Board'); }}>Review plan</button></div>}
               </div>; })()}
-              {buildOffer && !chatBusy && buildOffer.chatId === activeChatId && project && messages.length > 0 && <div className="build-offer"><button type="button" className="button button-secondary" onClick={() => { const offer = buildOffer; setBuildOffer(null); runComposer({ prompt: offer.prompt, mode: 'plan', model: offer.model }); }}>Start build</button><span className="subtle">Makes a plan first. No files change until you approve.</span></div>}
+              {buildOffer && !chatBusy && buildOffer.chatId === activeChatId && project && messages.length > 0 && <div className="build-offer"><button type="button" className="button button-secondary" onClick={() => { const offer = buildOffer; setBuildOffer(null); runComposer({ prompt: offer.prompt, mode: 'plan', model: offer.model }); }}>Start task</button><span className="subtle">Makes a plan first. No files change until you approve.</span></div>}
               <div className="build-form">
                 <label htmlFor="active-project">Project</label>
                 {realProjects.length === 0 && !project
-                  ? <div className="project-row project-empty"><p>Create your first project to start building. You can still chat without one.</p><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>
+                  ? <div className="project-row project-empty"><p>Create a project so Free way can change files. You can still chat without one.</p><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>
                   : <div className="project-row"><select id="active-project" aria-label="Active project" value={project} onChange={(event) => chooseProject(event.target.value)}>{!project && <option value="">Choose a project</option>}{realProjects.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>}
               </div>
               {!chatBusy && messages.length > 1 && messages[messages.length - 1]?.role === 'assistant' && !messages[messages.length - 1]?.pending && <AdSlot variant="strip" placement="chat" project={project} context={messages.filter((m) => m.role === 'user').slice(-2).map((m) => m.content).join(' ')} runKey={`home-${activeChatId || ''}-${messages.length}`} />}
@@ -797,11 +793,12 @@ export default function App() {
                 skills={skillsList.skills} skill={composerSkill} onSkill={setComposerSkill} skillsReason={skillsList.reason}
                 location={config?.mode === 'cloud' ? { label: 'Cloud', title: 'Runs on the Free way cloud server. Switching to Local is not available here.' } : { label: 'Local', title: 'Runs on this computer\'s Free way server.' }} />
             </div>
+            {splitOpen && <SplitPane chats={activeChats} activeChatId={activeChatId} models={freeModels} onOpen={(id) => { selectChat(id); setSplitOpen(false); }} onClose={() => setSplitOpen(false)} />}
             
           </section>}
 
           {view === 'Board' && <section className="workspace-page"><div className="section-heading"><div><h1>Board</h1><p>Plans, actions, and reviews stay in their current state until you decide.</p></div></div>
-            {!activeAgent ? <p className="empty-state">No agent sessions yet. Start a build from Home.</p> : <div className="agent-panel"><div className="agent-title-row"><div><p className="eyebrow">{activeAgent.project || project}</p><h2>{activeAgent.title || activeAgent.prompt || 'Build session'}</h2></div><span className="state-badge" role="status">{statusName(activeAgent.state)}</span></div>
+            {!activeAgent ? <p className="empty-state">No agent sessions yet. Start one from Home.</p> : <div className="agent-panel"><div className="agent-title-row"><div><p className="eyebrow">{activeAgent.project || project}</p><h2>{activeAgent.title || activeAgent.prompt || 'Session'}</h2></div><span className="state-badge" role="status">{statusName(activeAgent.state)}</span></div>
               <div className="agent-meta"><span>Model: {activeAgent.model || 'auto'}</span><span>State: {activeAgent.state}</span>{activeAgent.checks && <span>Checks: {activeAgent.checks}</span>}</div>
               <DetectedRuntimes projectId={activeAgent.project || project} />
               {activeAgent.orchestration && <ProgressBox agent={activeAgent} />}
@@ -898,6 +895,7 @@ export default function App() {
           {view === 'Me' && <section className="workspace-page" data-view="me"><div className="section-heading"><div><h1>Me</h1><p>This build reports workspace facts only; it does not have a profile identity.</p></div></div><dl className="runtime-facts"><div><dt>Identity</dt><dd>Local workspace</dd></div><div><dt>Runtime</dt><dd>{config?.mode || 'Loading'}</dd></div><div><dt>Version</dt><dd>{config?.version || 'Unavailable'}</dd></div><div><dt>Google Sign-In</dt><dd>Off</dd></div></dl></section>}
           </ErrorBoundary>
         </div>
+        {terminalOpen && <TerminalPanel project={project} onClose={() => setTerminalOpen(false)} />}
       </main>
 
       {projectDialog && <div className="modal-backdrop"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="project-dialog-title"><h2 id="project-dialog-title">New project</h2><form onSubmit={createProject}><label htmlFor="project-name">Project name</label><input id="project-name" aria-label="Project name" value={projectName} onChange={(event) => setProjectName(event.target.value)} autoFocus /><p className="subtle">A local project folder and initial Git repository will be created.</p><div className="modal-actions"><button className="button button-secondary" type="button" onClick={() => setProjectDialog(false)}>Cancel</button><button className="button button-primary" type="submit">Create project</button></div></form></section></div>}

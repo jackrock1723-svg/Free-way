@@ -693,7 +693,7 @@ def make_handler(app):
             if m == "POST" and seg in (["chat"], ["chat", "stream"]):
                 app.storage.record_usage(self.user["id"], "chat")
             if m == "GET" and seg == ["config"]: return self._send(200, app.config())
-            if m == "GET" and seg == ["models"]: return self._send(200, catalog.public_list())
+            if m == "GET" and seg == ["models"]: return self._send(200, catalog.public_list(None if app.mock else app.keys))
             if seg == ["settings", "usage"]:
                 if m != "GET": return self.err(405, "method not allowed")
                 period = (qs.get("period") or ["7d"])[0]
@@ -867,6 +867,23 @@ def make_handler(app):
                     except ValueError: limit = 20
                     return self._send(200, {"query": q, "results": index.search(q, limit)})
                 return self.err(405, "method not allowed")
+            if seg == ["terminal"]:
+                from .sandbox import is_hosted
+                available = app.mode == "local" and not is_hosted()
+                reason = "" if available else ("The terminal is not available on hosted Free way. "
+                                               "Download the desktop app to run commands on your own computer.")
+                if m == "GET": return self._send(200, {"available": available, "reason": reason})
+                if m != "POST": return self.err(405, "method not allowed")
+                if not available: return self.err(403, reason)
+                b = self._body()
+                pid = str(b.get("project") or "")
+                if not valid_id(pid): raise ValueError("Choose a project first.")
+                root = app.ws.project_dir(pid)
+                if not root.is_dir(): return self.err(404, "project not found")
+                command = str(b.get("command") or "").strip()
+                if not command: raise ValueError("Type a command.")
+                result = app.ws.run(root, command, timeout=30)
+                return self._send(200, {"command": command, "exit_code": result.get("exit_code"), "output": str(result.get("output") or "")[-20000:]})
             if seg == ["sandbox", "status"] and m == "GET":
                 from .sandbox import SANDBOX
                 prefs = app.settings_store.read().get("preferences") or {}

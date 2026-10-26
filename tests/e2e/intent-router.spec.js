@@ -26,7 +26,7 @@ test('a question gets a chat reply with Start build, and no build starts on its 
   await open(page);
   await page.getByLabel('Build prompt').fill('what does this project do?');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
-  const offer = page.getByRole('button', { name: 'Start build', exact: true });
+  const offer = page.getByRole('button', { name: 'Start task', exact: true });
   await expect(offer).toBeVisible({ timeout: 15_000 });
   await expect(page.locator('.home-messages .message-assistant').last()).not.toHaveText(/Thinking/);
   expect(orchestrations).toHaveLength(0);

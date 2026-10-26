@@ -101,7 +101,7 @@ test('plan and action approvals stay explicit through diff and review', async ({
 test('Mission milestone completion requires its own approval before the next plan', async ({ page }) => {
   const externalRequests = await openOfflineWorkspace(page);
   await page.getByLabel('Build prompt').fill('Create a mission workspace');
-  await page.getByRole('radio', { name: 'Mission' }).check();
+  await page.getByLabel('Run mode').selectOption({ label: 'Mission' });
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /^Plan approval required$/ })).toBeVisible();
   await page.getByRole('button', { name: 'Approve plan' }).click();
@@ -166,7 +166,7 @@ test('responsive navigation reaches all six core workspace sections', async ({ p
     const control = nav.getByRole('button', { name: section, exact: true });
     await expect(control).toBeVisible();
     await control.click();
-    if (section === 'Home') await expect(page.getByRole('heading', { name: 'Build with clear intent.', exact: true })).toBeVisible();
+    if (section === 'Home') await expect(page.getByRole('heading', { name: 'Free way', exact: true })).toBeVisible();
     else await expect(page.getByRole('heading', { name: section, exact: true })).toBeVisible();
   }
   expect(externalRequests).toEqual([]);

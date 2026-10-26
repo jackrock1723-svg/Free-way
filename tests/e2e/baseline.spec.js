@@ -25,7 +25,7 @@ test('React shell loads without provider requests and Google Sign-In stays disab
 
   await page.goto('/');
   await expect(page).toHaveTitle('Free way');
-  await expect(page.getByRole('heading', { name: 'Build with clear intent.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Free way', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Skip to content' })).toHaveCount(1);
   await expect(page.locator('.runtime-panel')).toHaveCount(0);  // status panel removed from Home (info: sidebar + admin overview)
   const authMode = await page.evaluate(async () => {
@@ -42,7 +42,7 @@ test('legacy token URL is migrated before the React shell renders when Sign-In i
   const externalRequests = await blockExternalRequests(page);
 
   await page.goto('/?token=legacy-test-token&tab=home#chat');
-  await expect(page.getByRole('heading', { name: 'Build with clear intent.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Free way', exact: true })).toBeVisible();
   await expect.poll(() => page.evaluate(() => ({
     authMode: window.GoogleSignIn?.mode ?? 'missing',
     tokenStored: Boolean(localStorage.getItem('fc.token')),

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 const THEMES = [
-  { id: 'auto', name: 'Auto', scheme: 'dark', swatch: '#f472b6' },
+  { id: 'auto', name: 'Auto', scheme: 'dark', swatch: '#2fd46b' },
   { id: 'dark', name: 'Dark', scheme: 'dark', swatch: '#a5a5b5' },
-  { id: 'light', name: 'Light', scheme: 'light', swatch: '#be185d' },
+  { id: 'light', name: 'Light', scheme: 'light', swatch: '#15803d' },
   { id: 'og-shine', name: 'OG Shine', scheme: 'dark', swatch: '#a296ff' },
   { id: 'alpine', name: 'Alpine', scheme: 'dark', swatch: '#8be0b7' },
   { id: 'dune', name: 'Dune', scheme: 'dark', swatch: '#ffd08a' },

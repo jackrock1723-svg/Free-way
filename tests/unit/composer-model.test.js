@@ -16,8 +16,8 @@ test('model picker keeps only free catalog models, in a fixed order', () => {
 });
 
 test('modes and placeholders match the Freebuff composer', () => {
-  assert.deepEqual(COMPOSER_MODES.map((m) => m.label), ['Build', 'Plan', 'Mission', 'Skills']);
-  assert.equal(composerPlaceholder(false), 'Type a message — / for commands, @ for threads or files');
+  assert.deepEqual(COMPOSER_MODES.map((m) => m.label), ['Agent', 'Plan', 'Mission', 'Skills']);
+  assert.equal(composerPlaceholder(false), 'Ask Free way… Use / for commands');
   assert.equal(composerPlaceholder(true), 'Type a message — added to the queue');
 });
 

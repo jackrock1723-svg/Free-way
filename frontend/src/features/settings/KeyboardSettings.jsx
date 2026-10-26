@@ -15,8 +15,8 @@ export const DEFAULT_SHORTCUTS = Object.freeze({
 });
 
 const ACTIONS = [
-  { id: 'toggle_sidebar', label: 'Toggle left sidebar', reason: 'Unavailable: this browser reserves Ctrl+B for bookmarks.' },
-  { id: 'toggle_terminal', label: 'Toggle bottom terminal', reason: 'Unavailable: this build has no in-app terminal.' },
+  { id: 'toggle_sidebar', label: 'Toggle left sidebar', reason: 'Active in Free way.' },
+  { id: 'toggle_terminal', label: 'Toggle bottom terminal', reason: 'Active in Free way.' },
   { id: 'toggle_right_panel', label: 'Toggle right panel', reason: 'Unavailable: this build has no right-side panel.' },
   { id: 'search_chats', label: 'Search chats', reason: 'Unavailable: chat search is not implemented and the browser may reserve Ctrl+K.' },
   { id: 'open_settings', label: 'Open settings', reason: 'Active in Free way. Browser-reserved chords are not used.' },
@@ -27,6 +27,8 @@ const ACTIONS = [
   { id: 'previous_tab', label: 'Previous tab', reason: 'Unavailable: tab switching is handled by the browser.' },
   { id: 'reopen_tab', label: 'Reopen closed tab', reason: 'Unavailable: Ctrl+Shift+T is reserved by the browser.' },
 ];
+
+const ACTIVE = new Set(['open_settings', 'toggle_sidebar', 'toggle_terminal']);
 
 export function shortcutFromEvent(event) {
   if (!event || ['Alt', 'Control', 'Meta', 'Shift', 'Escape', 'Enter', 'Tab'].includes(event.key)) return '';
@@ -105,7 +107,7 @@ export default function KeyboardSettings({ preferences = {}, onSave, disabled = 
     <section className="settings-section" aria-labelledby="keyboard-settings-title">
       <div className="settings-section-heading">
         <h2 id="keyboard-settings-title">Keyboard shortcuts</h2>
-        <p>Only Open settings is bound in this browser build. Other listed actions stay unbound when their feature is unavailable or the browser owns the chord.</p>
+        <p>Open settings, Toggle left sidebar and Toggle bottom terminal are bound in this browser build. Other listed actions stay unbound when their feature is unavailable or the browser owns the chord.</p>
       </div>
       <p className="settings-save-status" data-testid="settings-save-status" role="status">{status}</p>
       {error && <p className="settings-inline-error" role="alert">{error}</p>}
@@ -115,7 +117,7 @@ export default function KeyboardSettings({ preferences = {}, onSave, disabled = 
           <thead><tr><th scope="col">Action</th><th scope="col">Shortcut</th><th scope="col">Availability</th></tr></thead>
           <tbody>
             {ACTIONS.map((action) => {
-              const active = action.id === 'open_settings';
+              const active = ACTIVE.has(action.id);
               return (
                 <tr key={action.id}>
                   <th scope="row">{action.label}</th>

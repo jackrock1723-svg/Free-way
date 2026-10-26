@@ -68,6 +68,23 @@ def resolve(bid: str, skill: str = "code") -> list:
             seen.add((prov, model)); out.append((br.id, prov, model))
     return out
 
-def public_list() -> list:
-    return [{"id": b.id, "name": b.name, "tag": b.tag, "tier": b.tier, "plan": b.plan,
-             "context": b.context, "free": b.tier == "free"} for b in FREE + PREMIUM]
+def availability(b: Brand, keys) -> dict:
+    """Which providers this model needs, given the configured keys. Auto runs if any free provider has a key."""
+    provs = sorted({p for br in FREE for p, _ in br.upstream}) if b.id == "auto" else sorted({p for p, _ in b.upstream})
+    ok = any(keys.get(p) for p in provs)
+    return {"available": ok, "needs_key": [] if ok else provs}
+
+def public_list(keys=None) -> list:
+    out = []
+    for b in FREE + PREMIUM:
+        row = {"id": b.id, "name": b.name, "tag": b.tag, "tier": b.tier, "plan": b.plan,
+               "context": b.context, "free": b.tier == "free"}
+        if keys is not None and b.tier == "free": row.update(availability(b, keys))
+        out.append(row)
+    return out
+
+def route_info(requested: str, bid: str, prov: str, model: str) -> dict:
+    """What actually answered, and whether that differs from the model the user picked."""
+    req = ALL.get(requested); first = req.upstream[0] if req and req.upstream else None
+    fallback = requested != "auto" and (bid != requested or (prov, model) != tuple(first or ()))
+    return {"requested": requested, "name": ALL[bid].name if bid in ALL else bid, "fallback": fallback}
