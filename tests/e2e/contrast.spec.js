@@ -57,17 +57,17 @@ async function lowContrast(page) {
   });
 }
 
-for (const [label, preset] of [['default (white)', null], ['dark', 'dark']]) {
+for (const [label, preset] of [['default (Freebuff dark)', null], ['light (white)', 'light']]) {
   test(`${label} theme: every main page keeps text, inputs and placeholders at WCAG AA contrast`, async ({ page }) => {
     test.setTimeout(60_000);
     await useTheme(page, preset);
     await page.goto('/');
-    await expect(page.locator('.workspace-shell')).toHaveAttribute('data-theme', preset || /auto|light/);
+    await expect(page.locator('.workspace-shell')).toHaveAttribute('data-theme', preset || 'auto');
     if (!preset) {
       const bg = await page.locator('.workspace-shell').evaluate((el) => getComputedStyle(el).backgroundColor);
-      expect(bg).toBe('rgb(255, 255, 255)');
+      expect(bg).toBe('rgb(10, 10, 10)');
       const color = await page.locator('.workspace-shell').evaluate((el) => getComputedStyle(el).color);
-      expect(color).toBe('rgb(10, 10, 10)');
+      expect(color).toBe('rgb(235, 235, 235)');
     }
     await page.getByLabel('Build prompt').fill('hi');
     const problems = {};
@@ -81,12 +81,12 @@ for (const [label, preset] of [['default (white)', null], ['dark', 'dark']]) {
   });
 }
 
-test('default theme follows white even when the OS prefers dark', async ({ browser }) => {
-  const context = await browser.newContext({ colorScheme: 'dark' });
+test('default theme stays dark even when the OS prefers light', async ({ browser }) => {
+  const context = await browser.newContext({ colorScheme: 'light' });
   const page = await context.newPage();
   await page.goto('/');
   const bg = await page.locator('.workspace-shell').evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(bg).toBe('rgb(255, 255, 255)');
+  expect(bg).toBe('rgb(10, 10, 10)');
   await context.close();
 });
 

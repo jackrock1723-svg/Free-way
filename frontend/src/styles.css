@@ -958,3 +958,27 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .project-empty p { margin: 0; color: var(--muted); }
 .sidebar-manage { margin: 6px 0 0 4px; font-size: 12px; }
 .landing:has(.home-messages) { grid-template-columns: minmax(0, 1fr); }
+
+/* Freebuff-style dark default ("Auto" and "Dark"): #0a0a0a canvas, #0f0f0f chrome, #171717/#1c1c1c surfaces, light 400-500 type,
+   Free way pink accent. Borders a step brighter than Freebuff (#262626) so card/table corners stay clearly visible. White = "Light". */
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) { --canvas: #0a0a0a; --sidebar: #0f0f0f; --surface: #171717; --surface-raised: #1c1c1c; --line: #3a3a3a; --text: #ebebeb; --muted: #a3a3a3; --faint: #949494; --accent: #f472b6; --accent-soft: #3b1730; --good: #86d8b3; --focus: #f9a8d4; color-scheme: dark; background-image: none; font-size: 14px; font-weight: 400; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .sidebar { background: var(--sidebar); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .topbar { background: var(--sidebar); }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-primary { background: #f472b6; color: #0a0a0a; font-weight: 500; box-shadow: none; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-primary:hover { background: #f9a8d4; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .nav-item.is-current { color: var(--text); }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .runtime-badge { border-color: var(--line); color: #f9a8d4; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .alert { border-color: #7f1d3a; background: #2a0f1a; color: #fecdd3; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(.error-text, .settings-inline-error, .token-signin .token-signin-error) { color: #fca5a5; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .text-button { color: #f9a8d4; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-warning { border-color: #92400e; background: #2b1d0e; color: #fde3c4; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(.chat-history-open:hover, .chat-history-open[aria-current="true"]) { color: var(--text); }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .state-badge { border-color: var(--line); background: var(--accent-soft); color: #fbcfe8; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .state-badge.is-connected { border-color: #2f5a45; background: #10241b; color: var(--good); }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(h1, h2, h3, strong, th) { font-weight: 500; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .message { font-size: 14px; line-height: 1.6; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .message-user { background: #1c1c1c; border: 1px solid var(--line); border-radius: 18px; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .message-assistant { background: transparent; border: 0; padding-left: 0; padding-right: 0; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(.home-messages, .build-form, .home-reply) { max-width: 720px; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .build-form textarea { border-radius: 24px; padding: 14px 16px; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(table, th, td) { border-color: var(--line); }
