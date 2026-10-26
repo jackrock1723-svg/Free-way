@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const PAGES = ['Home', 'Board', 'Apps', 'Preview', 'Me', 'Settings'];
+const PAGES = ['Home', 'Board', 'Preview', 'Me', 'Settings'];
 const ADMIN_TOKEN = 'fw-e2e-admin-token-0123456789';
 
 async function useTheme(page, preset) {

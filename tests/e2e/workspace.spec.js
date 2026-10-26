@@ -113,11 +113,9 @@ test('Mission milestone completion requires its own approval before the next pla
   expect(externalRequests).toEqual([]);
 });
 
-test('Apps shows real local connector status without attempting external connection', async ({ page }) => {
+test('Apps is hidden from navigation: it had no working connect action', async ({ page }) => {
   const externalRequests = await openOfflineWorkspace(page);
-  await primary(page).getByRole('button', { name: 'Apps' }).click();
-  await expect(page.getByRole('heading', { name: 'Apps' })).toBeVisible();
-  await expect(page.getByText('Connections are not configured', { exact: false })).toBeVisible();
+  await expect(primary(page).getByRole('button', { name: 'Apps' })).toHaveCount(0);
   expect(externalRequests).toEqual([]);
 });
 
@@ -164,7 +162,7 @@ test('Preview provides refresh and in-session back/forward navigation after a co
 test('responsive navigation reaches all six core workspace sections', async ({ page }) => {
   const externalRequests = await openOfflineWorkspace(page);
   const nav = primary(page);
-  for (const section of ['Home', 'Board', 'Apps', 'Preview', 'Me']) {
+  for (const section of ['Home', 'Board', 'Preview', 'Me']) {
     const control = nav.getByRole('button', { name: section, exact: true });
     await expect(control).toBeVisible();
     await control.click();

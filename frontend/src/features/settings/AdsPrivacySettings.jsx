@@ -66,8 +66,10 @@ export default function AdsPrivacySettings() {
             <input type="checkbox" checked={p.use_stack} disabled={saving} onChange={toggle} />
             {' '}Use my project&apos;s stack (languages and frameworks) to pick relevant ads
           </label>
+          <p className="settings-help">Your choice is stored in your ad consent record, and the download shows the same value. Personalised (interest-based) ads are a separate opt-in and are {p.personalized ? 'on' : 'off'}.</p>
+          <p className="settings-help" data-testid="ads-download-help">Download my data saves a JSON file with your consent choices, interest categories and ad counts only. No prompts or code.</p>
           <div className="settings-actions">
-            <button className="button button-secondary" type="button" onClick={download}>Download my ad data</button>
+            <button className="button button-secondary" type="button" onClick={download}>Download my data</button>
             <button className="button button-secondary" type="button" onClick={erase}>Delete my ad data</button>
           </div>
         </div>

@@ -191,6 +191,7 @@ class AdService:
                                                   "interests": {}, "credits": 0, "bonus_granted": False, "shown": [], "runs": {}, "anon": secrets.token_hex(8)})
         u.setdefault("privacy", {"use_stack": True}); u.setdefault("signals", None); u.setdefault("closed", 0)
         c = u["consent"]
+        if "use_stack" not in c: c["use_stack"] = bool(u["privacy"].get("use_stack", True))   # single source of truth: the consent record
         if c["personalized"] and c["version"] != CONSENT_VERSION:
             now = self.clock(); old_version = c["version"]
             c.update(personalized=False, at=now)
@@ -243,16 +244,17 @@ class AdService:
     def privacy(self, uid):
         with self.lock:
             u = self._user(uid)
-            return {"use_stack": bool(u["privacy"].get("use_stack", True)), "notice": PRIVACY_NOTICE,
+            return {"use_stack": bool(u["consent"]["use_stack"]), "personalized": bool(u["consent"]["personalized"]), "notice": PRIVACY_NOTICE,
                     "enabled": bool(self.state["cfg"].get("enabled", 1)), "available": self._publisher_configured()}
     def set_privacy(self, uid, use_stack):
         if use_stack is not True and use_stack is not False: raise ValueError("use_stack must be true or false")
         with self.lock:
-            u = self._user(uid); u["privacy"]["use_stack"] = use_stack
+            u = self._user(uid); u["consent"]["use_stack"] = use_stack; u["privacy"]["use_stack"] = use_stack
+            u["consent"]["history"].append({"at": self.clock(), "use_stack": use_stack})
             if not use_stack and u.get("signals"): u["signals"] = dict(u["signals"], languages=[], frameworks=[])
             self._save(); return self.privacy(uid)
     def uses_stack(self, uid):
-        with self.lock: return bool(self._user(uid)["privacy"].get("use_stack", True))
+        with self.lock: return bool(self._user(uid)["consent"]["use_stack"])
     def closed(self, uid):
         with self.lock:
             u = self._user(uid); u["closed"] = int(u.get("closed", 0)) + 1; self._save(); return {"ok": True}
@@ -263,7 +265,7 @@ class AdService:
                 s = u.get("signals") or {}
                 rows.append({"user_id": uid, "categories": s.get("categories", []), "languages": s.get("languages", []),
                              "frameworks": s.get("frameworks", []), "at": s.get("at"), "shown": len(u.get("shown", [])),
-                             "closed": int(u.get("closed", 0)), "use_stack": bool(u.get("privacy", {}).get("use_stack", True)),
+                             "closed": int(u.get("closed", 0)), "use_stack": bool(u["consent"].get("use_stack", u.get("privacy", {}).get("use_stack", True))),
                              "personalized": bool(u["consent"]["personalized"])})
             return sorted(rows, key=lambda r: -(r["at"] or 0))
 
@@ -291,7 +293,7 @@ class AdService:
         if agent_state is not None and agent_state not in PAUSE_STATES: return {"ad": None, "reason": "not a pause"}
         thr = float(self.state["cfg"].get("min_relevance", DEFAULT_CFG["min_relevance"]))
         with self.lock:
-            if stack and not self._user(uid)["privacy"].get("use_stack", True): stack = None
+            if stack and not self._user(uid)["consent"]["use_stack"]: stack = None
         stack = stack or None
         scored = score_categories(context_text, stack, self.state["cfg"].get("stack_weight", DEFAULT_CFG["stack_weight"]))
         cats = [c for c, s in scored if s >= thr][:3]

@@ -389,6 +389,15 @@ class OrchestratorManager:
         context_parts = []
         total = 0
         scanned = 0
+        try:   # AGENTS.md (project instructions) always goes first so the file-scan limits can never drop it
+            agents_md = safe_path(root, "AGENTS.md")
+            if agents_md.is_file() and not agents_md.is_symlink():
+                with agents_md.open("rb") as source:
+                    text = source.read(MAX_CONTEXT_FILE_CHARS * 4).decode("utf-8", errors="replace")[:MAX_CONTEXT_FILE_CHARS]
+                if text.strip():
+                    context_parts.append(f"--- AGENTS.md ---\n{text}"); total += len(context_parts[0])
+        except (OSError, ValueError):
+            pass
         for directory, subdirs, files in os.walk(root, followlinks=False):
             subdirs[:] = sorted(name for name in subdirs if name.lower() not in excluded_dirs and not (Path(directory) / name).is_symlink())[:16]
             for name in sorted(files):
@@ -398,6 +407,8 @@ class OrchestratorManager:
                 path = Path(directory) / name
                 relative = path.relative_to(root).as_posix()
                 lower = relative.lower()
+                if relative == "AGENTS.md":
+                    continue
                 if path.is_symlink() or any(token in lower for token in (".env", "secret", "token", "credential", "private", "password", "apikey", "api-key", "lock")):
                     continue
                 if path.suffix.lower() not in allowed_suffixes:

@@ -34,7 +34,7 @@ import ProgressBox from './features/progress/ProgressBox.jsx';
 import QuestionsCard from './features/progress/QuestionsCard.jsx';
 import { mergeAnswers, scopeQuestions } from './features/progress/progressModel.js';
 
-const sections = ['Home', 'Board', 'Apps', 'Preview', 'Me', 'Settings'];  // chats live in the sidebar and on Home
+const sections = ['Home', 'Board', 'Preview', 'Me', 'Settings'];  // Apps hidden: status-only, no connect actions (see Settings > Integrations)  // chats live in the sidebar and on Home
 const iconPaths = {
   Home: 'M3 10.5 12 3l9 7.5M5.5 9.5V21h13V9.5M9 21v-6h6v6',
   Board: 'M4 4h7v7H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 13h7v7H4z',

@@ -55,7 +55,7 @@ test('home: new project dialog cancel and create, mission toggle, build starts',
 test('every primary section opens without crashing', async ({ page }) => {
   const problems = guard(page);
   await page.goto('/');
-  for (const section of ['Home', 'Board', 'Apps', 'Preview', 'Me', 'Settings', 'Home']) {
+  for (const section of ['Home', 'Board', 'Preview', 'Me', 'Settings', 'Home']) {
     await nav(page, section);
     await expect(page.locator('.topbar p')).toHaveText(section);
     await noCrash(page, problems);

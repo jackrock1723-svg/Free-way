@@ -148,67 +148,28 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Settings', exact: true })).toBeVisible();
 });
 
-test('General preferences save and reload while unsupported services stay clearly unavailable', async ({ page }) => {
+test('General shows only settings with a real effect, and Agent mode saves and reloads', async ({ page }) => {
   await openSettings(page);
-
-  const advanced = page.getByRole('checkbox', { name: 'Advanced Mode' });
-  const sounds = page.getByRole('checkbox', { name: 'Notification sounds' });
-  const nextSession = page.getByRole('checkbox', { name: 'Automatically start the next session' });
-  const includeAgents = page.getByRole('checkbox', { name: 'Include AGENTS.md' });
-  const fullAccess = page.getByRole('checkbox', { name: 'Full access' });
-
-  await expect(advanced).not.toBeChecked();
-  await expect(fullAccess).not.toBeChecked();
-  await expect(page.getByText(/saved preference.*not available yet/i)).toBeVisible();
-  await expect(page.getByRole('checkbox', { name: 'Mirror to my phone' })).toBeDisabled();
-  await expect(page.getByText(/phone mirroring is unavailable/i)).toBeVisible();
-  await expect(page.getByRole('checkbox', { name: 'Show in Discord status' })).toBeDisabled();
-  await expect(page.getByText(/Discord status is unavailable/i)).toBeVisible();
-  await expect(page.getByLabel('Cloud chat auto-archive')).toBeDisabled();
-  await expect(page.getByRole('checkbox', { name: 'Pre-sync projects to Cloud' })).toBeDisabled();
-
-  await advanced.check();
+  for (const name of ['Advanced Mode', 'Notification sounds', 'Automatically start the next session', 'Include AGENTS.md', 'Pre-sync projects to Cloud', 'Full access', 'Mirror to my phone', 'Show in Discord status']) {
+    await expect(page.getByRole('checkbox', { name })).toHaveCount(0);
+  }
+  await expect(page.getByLabel('Local chat auto-archive')).toHaveCount(0);
+  await expect(page.getByLabel('Cloud chat auto-archive')).toHaveCount(0);
+  await expect(page.getByText(/saved preference/i)).toHaveCount(0);
+  await expect(page.getByText(/Default: all specialists, balanced\. Lite: .* Max: .* Plan: plans only, never writes files\./)).toBeVisible();
+  await page.getByLabel('Agent mode').selectOption('lite');
   await expect(page.getByTestId('settings-save-status')).toContainText('Saved');
-  await sounds.check();
-  await expect(page.getByTestId('settings-save-status')).toContainText('Saved');
-  await nextSession.check();
-  await expect(page.getByTestId('settings-save-status')).toContainText('Saved');
-  await includeAgents.check();
-  await expect(page.getByTestId('settings-save-status')).toContainText('Saved');
-  await page.getByLabel('Local chat auto-archive').selectOption('7d');
-  await expect(page.getByTestId('settings-save-status')).toContainText('Saved');
-
-  await fullAccess.click();
-  const warning = page.getByRole('dialog', { name: 'Full access warning' });
-  await expect(warning).toBeVisible();
-  await expect(warning).toContainText(/does not change approval behavior in this build/i);
-  await expect(fullAccess).not.toBeChecked();
-  await warning.getByRole('button', { name: 'Cancel' }).click();
-  await expect(fullAccess).not.toBeChecked();
-  await fullAccess.click();
-  await page.getByRole('dialog', { name: 'Full access warning' }).getByRole('button', { name: 'Save preference' }).click();
-  await expect(fullAccess).toBeChecked();
-  await expect(page.getByTestId('settings-save-status')).toContainText('Saved');
-
   await page.reload();
   await openSettings(page);
-  await expect(page.getByRole('checkbox', { name: 'Advanced Mode' })).toBeChecked();
-  await expect(page.getByRole('checkbox', { name: 'Notification sounds' })).toBeChecked();
-  await expect(page.getByRole('checkbox', { name: 'Automatically start the next session' })).toBeChecked();
-  await expect(page.getByRole('checkbox', { name: 'Include AGENTS.md' })).toBeChecked();
-  await expect(page.getByRole('checkbox', { name: 'Full access' })).toBeChecked();
-  await expect(page.getByLabel('Local chat auto-archive')).toHaveValue('7d');
+  await expect(page.getByLabel('Agent mode')).toHaveValue('lite');
 });
 
 test('a failed General settings save rolls the control back and shows an error', async ({ page }) => {
   const state = page.task7SettingsState;
   await openSettings(page);
   state.failNextGlobalWrite = true;
-
-  const advanced = page.getByRole('checkbox', { name: 'Advanced Mode' });
-  // click(), not check(): the mocked failure rolls the box back immediately, which check() reports as a failed click.
-  await advanced.click();
-  await expect(advanced).not.toBeChecked();
+  await page.getByLabel('Agent mode').selectOption('max');
+  await expect(page.getByLabel('Agent mode')).not.toHaveValue('max');
   await expect(page.getByRole('alert')).toContainText('Settings could not be saved');
 });
 

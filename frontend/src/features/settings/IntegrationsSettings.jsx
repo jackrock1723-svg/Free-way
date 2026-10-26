@@ -43,7 +43,7 @@ export default function IntegrationsSettings({ connectors = [], loading = false,
               : loading
                 ? 'Checking catalog…'
                 : connector
-                  ? (connector.connected === true ? 'Configured' : 'Not configured')
+                  ? (connector.connected === true ? 'Configured' : 'Connect coming soon')
                   : 'Unavailable in this build';
             return (
               <article className="integration-tile" data-testid="integration-tile" aria-labelledby={`integration-${tile.id}-title`} key={tile.id}>

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
 // This spec exercises the built-in demo sample project, which is no longer selected by default.
@@ -56,8 +57,11 @@ test('Ads & privacy settings show the notice and every control works', async ({ 
   await box.click();
   await expect(page.getByText('Stack-based ads are on.')).toBeVisible();
   const download = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download my ad data' }).click();
-  expect((await download).suggestedFilename()).toBe('free-way-ad-data.json');
+  await page.getByRole('button', { name: 'Download my data' }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe('free-way-ad-data.json');
+  expect(JSON.parse(readFileSync(await file.path(), 'utf8')).consent.use_stack).toBe(await box.isChecked());   // download matches the checkbox
+  await expect(page.getByTestId('ads-download-help')).toContainText('interest categories and ad counts only')
   await page.getByRole('button', { name: 'Delete my ad data' }).click();
   await expect(page.getByText('Your ad data was deleted.')).toBeVisible();
 });

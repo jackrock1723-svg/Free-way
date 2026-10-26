@@ -37,7 +37,6 @@ function messageFor(error) {
 export default function GeneralSettings({ preferences = {}, onSave, disabled = false }) {
   const [status, setStatus] = useState('No unsaved changes.');
   const [error, setError] = useState('');
-  const [showFullAccessWarning, setShowFullAccessWarning] = useState(false);
   const [sandboxState, setSandboxState] = useState(null);
   const sandboxMode = preferences.sandbox || 'off';
 
@@ -63,15 +62,7 @@ export default function GeneralSettings({ preferences = {}, onSave, disabled = f
   }
 
   function changeBoolean(key, value) {
-    if (key === 'full_access' && value) {
-      setShowFullAccessWarning(true);
-      return;
-    }
     void savePreference({ [key]: value });
-  }
-
-  async function confirmFullAccess() {
-    if (await savePreference({ full_access: true })) setShowFullAccessWarning(false);
   }
 
   return (
@@ -89,6 +80,7 @@ export default function GeneralSettings({ preferences = {}, onSave, disabled = f
           <div className="settings-row-copy">
             <label htmlFor="agent-mode">Agent mode</label>
             <p id="agent-mode-help">{AGENT_MODES.find((item) => item.value === (preferences.agent_mode || 'base2'))?.help}</p>
+            <p className="settings-help">Used by the Build button. Default: all specialists, balanced. Lite: fewer specialists, faster. Max: three competing editors, slower. Plan: plans only, never writes files.</p>
           </div>
           <select
             id="agent-mode"
@@ -130,122 +122,7 @@ export default function GeneralSettings({ preferences = {}, onSave, disabled = f
         />
       </div>
 
-      <div className="settings-group">
-        <h3>Workspace preferences</h3>
-        <SettingToggle
-          id="advanced-mode"
-          label="Advanced Mode"
-          description="Saved preference only; advanced controls are not available yet."
-          checked={Boolean(preferences.advanced_mode)}
-          disabled={disabled}
-          onChange={(value) => changeBoolean('advanced_mode', value)}
-        />
-        <SettingToggle
-          id="notification-sounds"
-          label="Notification sounds"
-          description="The preference is saved, but this build does not play sound alerts."
-          checked={Boolean(preferences.notification_sounds)}
-          disabled={disabled}
-          onChange={(value) => changeBoolean('notification_sounds', value)}
-        />
-        <SettingToggle
-          id="auto-next-session"
-          label="Automatically start the next session"
-          description="Saved as a preference; automatic session starting is not wired in this build."
-          checked={Boolean(preferences.auto_next_session)}
-          disabled={disabled}
-          onChange={(value) => changeBoolean('auto_next_session', value)}
-        />
-        <SettingToggle
-          id="include-agents-md"
-          label="Include AGENTS.md"
-          description="Saved as a preference; the current agent loader does not use it yet."
-          checked={Boolean(preferences.include_agents_md)}
-          disabled={disabled}
-          onChange={(value) => changeBoolean('include_agents_md', value)}
-        />
-        <SettingToggle
-          id="pre-sync-projects"
-          label="Pre-sync projects to Cloud"
-          description="Unavailable because this workspace has no cloud project-sync service."
-          checked={false}
-          disabled
-          onChange={() => {}}
-        />
-        <SettingToggle
-          id="full-access"
-          label="Full access"
-          description="Saved preference only; every agent action still requires explicit approval in this build."
-          checked={Boolean(preferences.full_access)}
-          disabled={disabled}
-          onChange={(value) => changeBoolean('full_access', value)}
-        />
-      </div>
 
-      <div className="settings-group">
-        <h3>Chat history</h3>
-        <div className="settings-row">
-          <div className="settings-row-copy">
-            <label htmlFor="local-chat-auto-archive">Local chat auto-archive</label>
-            <p id="local-chat-auto-archive-help">Saved as a preference; automatic archiving is not applied in this build.</p>
-          </div>
-          <select
-            id="local-chat-auto-archive"
-            aria-label="Local chat auto-archive"
-            aria-describedby="local-chat-auto-archive-help"
-            value={preferences.local_auto_archive || 'never'}
-            disabled={disabled}
-            onChange={(event) => void savePreference({ local_auto_archive: event.target.value })}
-          >
-            <option value="never">Never</option>
-            <option value="1d">After 1 day</option>
-            <option value="7d">After 1 week</option>
-            <option value="30d">After 1 month</option>
-          </select>
-        </div>
-        <div className="settings-row">
-          <div className="settings-row-copy">
-            <label htmlFor="cloud-chat-auto-archive">Cloud chat auto-archive</label>
-            <p id="cloud-chat-auto-archive-help">Unavailable because cloud chat storage is not configured.</p>
-          </div>
-          <select id="cloud-chat-auto-archive" aria-label="Cloud chat auto-archive" aria-describedby="cloud-chat-auto-archive-help" value="unavailable" disabled>
-            <option value="unavailable">Unavailable</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="settings-group">
-        <h3>Connections</h3>
-        <SettingToggle
-          id="phone-mirror"
-          label="Mirror to my phone"
-          description="Phone mirroring is unavailable because no phone-pairing service is configured."
-          checked={false}
-          disabled
-          onChange={() => {}}
-        />
-        <SettingToggle
-          id="discord-status"
-          label="Show in Discord status"
-          description="Discord status is unavailable because this build has no Discord connection."
-          checked={false}
-          disabled
-          onChange={() => {}}
-        />
-      </div>
-
-      {showFullAccessWarning && (
-        <div className="modal-backdrop">
-          <section className="modal settings-warning" role="dialog" aria-modal="true" aria-labelledby="full-access-warning-title" aria-describedby="full-access-warning-copy">
-            <h2 id="full-access-warning-title">Full access warning</h2>
-            <p id="full-access-warning-copy">This preference does not change approval behavior in this build. All agent actions still require your explicit approval. Saving it only records your choice for this workspace.</p>
-            <div className="modal-actions">
-              <button className="button button-secondary" type="button" autoFocus disabled={disabled} onClick={() => setShowFullAccessWarning(false)}>Cancel</button>
-              <button className="button button-warning" type="button" disabled={disabled} onClick={confirmFullAccess}>Save preference</button>
-            </div>
-          </section>
-        </div>
-      )}
     </section>
   );
 }
