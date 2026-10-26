@@ -49,6 +49,15 @@ def container_argv(argv: list[str]) -> list[str]:
     return [name, *argv[1:]]
 
 
+HOSTED_REASON = "The Docker sandbox is unavailable on hosted Free way."
+
+
+def is_hosted(env=None) -> bool:
+    """True on a hosting platform (Render sets RENDER=true) or when FREEWAY_HOSTED=1 is set."""
+    e = os.environ if env is None else env
+    return str(e.get("RENDER", "")).lower() == "true" or str(e.get("FREEWAY_HOSTED", "")).lower() in ("1", "true", "yes")
+
+
 class DockerSandbox:
     def __init__(self, docker: str | None = None):
         self._docker = docker
@@ -64,7 +73,8 @@ class DockerSandbox:
                 return dict(self._cached[1])
         cli = self.cli()
         if not cli:
-            result = {"available": False, "reason": "Docker is not installed on this computer."}
+            reason = HOSTED_REASON if is_hosted() else "Docker is not installed on this computer."
+            result = {"available": False, "hosted": is_hosted(), "reason": reason}
         else:
             try:
                 r = subprocess.run([cli, "version", "--format", "{{.Server.Version}}"], capture_output=True, text=True,

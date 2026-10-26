@@ -1,0 +1,43 @@
+# Render Blueprint for Free way. Names only - every secret value is typed
+# into the Render dashboard (sync: false means Render asks you for it).
+services:
+  - type: web
+    name: free-way
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: FREEWAY_HOSTED
+        value: "1"
+      - key: DATABASE_URL
+        sync: false
+      - key: FREECODE_TOKEN
+        sync: false
+      - key: FC_GOOGLE_AUTH
+        value: "1"
+      - key: FC_GOOGLE_CLIENT_ID
+        sync: false
+      - key: FC_GOOGLE_ORIGIN
+        sync: false
+      - key: FC_GOOGLE_OWNER_SUB
+        sync: false
+      - key: FC_GOOGLE_MULTI_USER
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: FW_ADMIN_TOKEN_SHA256
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_AI_KEY
+        sync: false

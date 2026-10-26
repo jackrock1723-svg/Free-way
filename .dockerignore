@@ -1,0 +1,22 @@
+# Never send secrets or local state into the image
+*.secret
+supabase_url.secret
+.env
+.env.*
+**/*.pem
+**/*.key
+.git
+.work
+node_modules
+**/node_modules
+web-react
+pydeps
+data
+rollback
+handoff
+tests
+test-results
+playwright-report
+docs
+*.log
+*.zip

@@ -486,9 +486,7 @@ def make_handler(app):
             return bool(tok) and hmac.compare_digest(tok, app.token or "")
 
         def _origin(self):
-            host = self.headers.get("X-Forwarded-Host") or self.headers.get("Host") or "127.0.0.1"
-            proto = self.headers.get("X-Forwarded-Proto") or ("https" if app.mode == "cloud" and not host.startswith(("127.", "localhost")) else "http")
-            return f"{proto}://{host}"
+            return public_origin(self.headers.get("X-Forwarded-Host"), self.headers.get("Host"), self.headers.get("X-Forwarded-Proto"), app.mode)
         def _body(self):
             n = int(self.headers.get("Content-Length") or 0)
             if n > 36_000_000:
@@ -972,10 +970,25 @@ def serve(app, host, port):
     httpd.daemon_threads = True
     return httpd
 
+def public_origin(fwd_host, host, fwd_proto, mode):
+    """Public origin for OAuth redirects behind a proxy (Render, cloudflared). Proxies may send comma lists; the first hop wins.
+    Only http/https are accepted; cloud mode on a public host defaults to https."""
+    first = lambda v: str(v or "").split(",")[0].strip()
+    h = first(fwd_host) or first(host) or "127.0.0.1"
+    p = first(fwd_proto).lower()
+    if p not in ("http", "https"):
+        p = "https" if mode == "cloud" and not h.startswith(("127.", "localhost")) else "http"
+    return f"{p}://{h}"
+
+def default_port(env=None):
+    """Hosts like Render pass the port in $PORT; --port still wins. Falls back to 8790."""
+    value = str((os.environ if env is None else env).get("PORT") or "").strip()
+    return int(value) if value.isdigit() and 0 < int(value) < 65536 else 8790
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="freecode")
     ap.add_argument("--mode", choices=["local", "cloud"], default="local")
-    ap.add_argument("--host"); ap.add_argument("--port", type=int, default=8790)
+    ap.add_argument("--host"); ap.add_argument("--port", type=int, default=default_port())
     ap.add_argument("--data", default=os.path.expanduser("~/.freecode"))
     ap.add_argument("--token", default=os.environ.get("FREECODE_TOKEN"))
     ap.add_argument("--mock", action="store_true", help="use the deterministic demo provider")
