@@ -199,7 +199,7 @@ test('blocked actions never expose an approval control', async ({ page }) => {
     if (route.request().method() === 'POST') await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify(blockedAgent) });
     else await route.continue();
   });
-  await page.getByLabel('Build prompt').fill('Try a blocked action');
+  await page.getByLabel('Build prompt').fill('Add a blocked file write to index.html');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByText('pending · blocked', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Approve action 1' })).toHaveCount(0);

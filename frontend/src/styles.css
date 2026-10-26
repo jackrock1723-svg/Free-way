@@ -1014,3 +1014,4 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .ad-strip-label { padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; font-size: 11px; }
 @media (max-width: 640px) { .composer { border-radius: 18px; } .composer-select { max-width: 150px; } }
 .workspace-shell[data-theme="light"] .approval-block > p:first-child { color: #4b3fa0; }
+.build-offer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 8px 0 4px; font-size: 12px; }

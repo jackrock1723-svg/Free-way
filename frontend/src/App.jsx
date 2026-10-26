@@ -5,7 +5,7 @@ import { mergeRequestPayload } from './merge.js';
 import { normalizePreviewPath, previewBaseFor, previewPathFromLocation } from './preview.js';
 import { mergeProjectList } from './projects.js';
 import { createChatStore } from './features/chat-history/chatStore.js';
-import { isChitChatError } from './homeRouting.js';
+import { isChitChatError, routeIntent } from './homeRouting.js';
 import { ChatRowMenu } from './features/chat-history/ChatRowMenu.jsx';
 import { ArchivedChats } from './features/chat-history/ArchivedChats.jsx';
 import { settingsApi } from './features/settings/settingsApi.js';
@@ -163,6 +163,7 @@ export default function App() {
   const [skillsList, setSkillsList] = useState({ skills: [], reason: '' });
   const [composerSkill, setComposerSkill] = useState('');
   const [queue, setQueue] = useState([]);
+  const [buildOffer, setBuildOffer] = useState(null);
   const chatAbortRef = useRef(null);
   const [building, setBuilding] = useState(false);
   const [projectDialog, setProjectDialog] = useState(false);
@@ -338,9 +339,15 @@ export default function App() {
       } catch (requestError) { setError(errorText(requestError)); }
       return;
     }
+    setBuildOffer(null);
     if (!project) {
       if (mode === 'build') { await sendChat(null, prompt, { model }); return; }  // never build without a project
       setError('Choose or create a project first.'); return;
+    }
+    if (mode === 'build' && routeIntent(prompt) === 'chat') {   // questions and unclear text get a reply; building is an explicit choice
+      await sendChat(null, prompt, { model });
+      setBuildOffer({ chatId: activeChatIdRef.current, prompt, model });
+      return;
     }
     setBuilding(true); setError(''); setNotice('');
     try {
@@ -762,6 +769,7 @@ export default function App() {
               <h1 id="welcome-title">Build with clear intent.</h1>
               <p className="lead">Describe a change. Review the plan. Approve each action before it runs.</p></>}
               {messages.length > 0 && <div className="messages home-messages" aria-live="polite" aria-label="Conversation">{messages.map((message, index) => <article className={`message message-${message.role}`} key={`${index}-${message.role}`}><strong>{message.role === 'user' ? 'You' : 'Free way'}</strong><p>{message.content || (message.pending ? 'Thinking…' : '')}</p></article>)}</div>}
+              {buildOffer && !chatBusy && buildOffer.chatId === activeChatId && project && messages.length > 0 && <div className="build-offer"><button type="button" className="button button-secondary" onClick={() => { const offer = buildOffer; setBuildOffer(null); runComposer({ prompt: offer.prompt, mode: 'plan', model: offer.model }); }}>Start build</button><span className="subtle">Makes a plan first. No files change until you approve.</span></div>}
               <div className="build-form">
                 <label htmlFor="active-project">Project</label>
                 {realProjects.length === 0 && !project
