@@ -15,7 +15,7 @@ and your Postgres/Supabase connection string. About 20 minutes.
 
 | Name | What to paste |
 |---|---|
-| `DATABASE_URL` | Your Supabase/Postgres connection string (Supabase: Project Settings > Database > Connection string > URI). |
+| `DATABASE_URL` | Your Supabase/Postgres connection string. In Supabase click **Connect** and copy the **Session pooler** URI (host ends in `pooler.supabase.com`). Do **not** use the "Direct connection" one - Render cannot reach it. |
 | `FREECODE_TOKEN` | A long random password you make up (30+ characters). **Required** - if empty, the server makes one and prints it in the logs. |
 | `FC_GOOGLE_CLIENT_ID` | From step 3 below (ends in `.apps.googleusercontent.com`). |
 | `FC_GOOGLE_ORIGIN` | Your Render address, e.g. `https://free-way.onrender.com` (no slash at the end). |
@@ -46,6 +46,9 @@ The first build takes about 5-10 minutes. When it says **Live**, open the addres
 - **Sandbox:** the Docker sandbox is not available on Render; Settings will say
   "unavailable on hosted".
 - **Health check:** Render checks `/api/health` to know the app is up.
+- **Check the database is really used:** open `https://<your-address>/api/health`. It must say
+  `"storage":"postgres"`. If it says `"local"`, the `DATABASE_URL` is wrong or unreachable and
+  everything will be lost on the next restart - fix the value in Render > Environment.
 
 If something fails, open Render > free-way > **Logs** and send a screenshot (never send
 the Environment page - it has your keys).
