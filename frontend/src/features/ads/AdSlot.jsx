@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../../api.js';
+import { adDomain } from '../composer/composerModel.js';
 
 // A small sponsored card shown only at natural pauses. It never blocks work: failures render nothing,
 // it sits below the content, and it can always be closed.
-export default function AdSlot({ placement, context = '', project, agentId, agentState, runKey }) {
+export default function AdSlot({ placement, context = '', project, agentId, agentState, runKey, variant }) {
   const [ad, setAd] = useState(null);
   const [why, setWhy] = useState(false);
   const [closed, setClosed] = useState(false);
@@ -37,6 +38,20 @@ export default function AdSlot({ placement, context = '', project, agentId, agen
   const click = () => {
     api.request('/api/ads/event', { method: 'POST', body: { id: ad.id, sig: ad.sig, kind: 'click' } }).catch(() => {});
   };
+
+  if (variant === 'strip') {
+    const domain = adDomain(ad.url);
+    return (
+      <aside className="ad-strip" aria-label="Sponsored">
+        <span className="ad-strip-icon" aria-hidden="true">{(ad.advertiser || ad.title || 'A').slice(0, 1).toUpperCase()}</span>
+        <div className="ad-strip-body">
+          <a className="ad-strip-title" href={ad.url} target="_blank" rel="noopener noreferrer sponsored" onClick={click}>{ad.title}</a>
+          <p className="ad-strip-line"><span className="ad-strip-label">Ad</span>{domain ? ` · ${domain}` : ''}{ad.text ? ` · ${ad.text}` : ''}</p>
+        </div>
+        <button type="button" className="ad-close" aria-label="Close ad" onClick={close}>×</button>
+      </aside>
+    );
+  }
 
   return (
     <aside className="ad-card" aria-label="Sponsored">

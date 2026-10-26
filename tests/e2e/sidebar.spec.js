@@ -18,7 +18,7 @@ test('sidebar: new chat, projects with their chat history, open a chat, profile/
   // New chat -> send a message -> it shows under the current project and reopens from the sidebar
   await side.getByRole('button', { name: 'Start a new chat' }).click();
   await page.getByLabel('Build prompt').fill('hello there');
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   const item = projects.locator('.sidebar-chat', { hasText: 'hello there' });
   await expect(item).toBeVisible({ timeout: 20_000 });
   await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Home', exact: true }).click();

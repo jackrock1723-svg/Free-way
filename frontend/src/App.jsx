@@ -28,6 +28,8 @@ import McpSettings from './features/settings/McpSettings.jsx';
 import UpdatesSettings from './features/settings/UpdatesSettings.jsx';
 import AdsPrivacySettings from './features/settings/AdsPrivacySettings.jsx';
 import AdSlot from './features/ads/AdSlot.jsx';
+import Composer from './features/composer/Composer.jsx';
+import { pickFreeModels } from './features/composer/composerModel.js';
 
 const sections = ['Home', 'Board', 'Apps', 'Preview', 'Me', 'Settings'];  // chats live in the sidebar and on Home
 const iconPaths = {
@@ -155,7 +157,13 @@ export default function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [buildPrompt, setBuildPrompt] = useState('');
-  const [mission, setMission] = useState(false);
+  const [composerMode, setComposerMode] = useState('build');
+  const [composerModel, setComposerModel] = useState('auto');
+  const [freeModels, setFreeModels] = useState([{ id: 'auto', name: 'Free way Auto' }]);
+  const [skillsList, setSkillsList] = useState({ skills: [], reason: '' });
+  const [composerSkill, setComposerSkill] = useState('');
+  const [queue, setQueue] = useState([]);
+  const chatAbortRef = useRef(null);
   const [building, setBuilding] = useState(false);
   const [projectDialog, setProjectDialog] = useState(false);
   const [projectName, setProjectName] = useState('');
@@ -308,25 +316,71 @@ export default function App() {
     }
   }
 
-  async function buildTask(event) {
+  const composerBusy = chatBusy || building || activeAgent?.state === 'orchestrating';
+
+  function buildTask(event) {
     event.preventDefault();
     const prompt = buildPrompt.trim();
     if (!prompt) { setError('Describe what you want built.'); return; }
-    if (!project) { setBuildPrompt(''); await sendChat(null, prompt); return; }  // never build without a project
+    const item = { prompt, mode: composerMode, model: composerModel, skill: composerSkill };
+    setBuildPrompt('');
+    if (composerBusy || queue.length) { setQueue((current) => [...current, item]); return; }  // runs in order once the agent is free
+    runComposer(item);
+  }
+
+  async function runComposer({ prompt, mode, model, skill }) {
+    if (mode === 'skills') {   // existing skills endpoint: the skill text rides along as file context on the normal chat backend
+      try {
+        const detail = await api.request(`/api/settings/skills/${encodeURIComponent(skill)}`);
+        const info = detail?.skill;
+        if (!info?.instructions) throw new Error('That skill could not be loaded.');
+        await sendChat(null, prompt, { model, files: [{ name: `skill ${info.name}`, kind: 'skill', size: info.instructions.length, text: info.instructions }] });
+      } catch (requestError) { setError(errorText(requestError)); }
+      return;
+    }
+    if (!project) {
+      if (mode === 'build') { await sendChat(null, prompt, { model }); return; }  // never build without a project
+      setError('Choose or create a project first.'); return;
+    }
     setBuilding(true); setError(''); setNotice('');
     try {
-      const created = mission
-        ? await api.request('/api/agents', { method: 'POST', body: { project, prompt, mission: true, model: 'auto', sync: true } })
-        : await api.createOrchestration({ project, prompt, model: 'auto', mode: settingsPreferencesRef.current.agent_mode || 'base2', request_id: `ui-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}` });
+      const created = mode === 'mission'
+        ? await api.request('/api/agents', { method: 'POST', body: { project, prompt, mission: true, model, sync: true } })
+        : await api.createOrchestration({ project, prompt, model, mode: mode === 'plan' ? 'plan' : (settingsPreferencesRef.current.agent_mode || 'base2'), request_id: `ui-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}` });
       setAgent(created);
       setAgents((current) => [created, ...current.filter((item) => item.id !== created.id)]);
-      setBuildPrompt(''); setMission(false); setView('Board'); setDiff(null); setReview(null);
+      setView('Board'); setDiff(null); setReview(null);
     } catch (requestError) {
-      if (isChitChatError(requestError)) { setBuildPrompt(''); setBuilding(false); await sendChat(null, prompt); }
+      if (isChitChatError(requestError)) { setBuilding(false); await sendChat(null, prompt, { model }); }
       else setError(errorText(requestError));
     }
     finally { setBuilding(false); }
   }
+
+  function stopComposer() {
+    if (chatBusy) chatAbortRef.current?.abort();
+    else if (activeAgent?.state === 'orchestrating') cancelOrchestration();
+  }
+
+  useEffect(() => {
+    if (composerBusy || !queue.length) return;
+    const [next, ...rest] = queue;
+    setQueue(rest);
+    runComposer(next);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [composerBusy, queue]);
+
+  useEffect(() => {
+    let live = true;
+    api.request('/api/models').then((list) => { const free = pickFreeModels(list); if (live && free.length) setFreeModels(free); }).catch(() => {});
+    api.request('/api/settings/skills').then((result) => {
+      if (!live) return;
+      const skills = Array.isArray(result?.skills) ? result.skills : [];
+      setSkillsList({ skills, reason: result?.reason || (skills.length ? '' : 'No local skills found') });
+      if (skills[0]) setComposerSkill((current) => current || skills[0].id);
+    }).catch(() => { if (live) setSkillsList({ skills: [], reason: 'Skills could not be loaded' }); });
+    return () => { live = false; };
+  }, []);
 
   // Greeting/question typed on Home: answer inline with the normal chat backend and keep it in chat history.
   async function replyOnHome(text) {
@@ -558,7 +612,7 @@ export default function App() {
     setNotice(result.ok ? 'Chat deleted.' : CHAT_STORAGE_WARNING);
   }
 
-  async function sendChat(event, override) {
+  async function sendChat(event, override, options = {}) {
     event?.preventDefault();
     const text = (typeof override === 'string' ? override : chatText).trim();
     if (!text || chatBusy || activeChat?.archived) return;
@@ -574,9 +628,13 @@ export default function App() {
     setChatText(''); setChatBusy(true); setError(''); setNotice('');
     persistChatMessages(chatId, initialMessages);
     const buffer = { value: '' };
-    const body = { mode: 'chat', model: 'auto', messages: outgoingMessages.map(({ role, content }) => ({ role, content })) };
+    const body = { mode: 'chat', model: options.model || 'auto', messages: outgoingMessages.map(({ role, content }) => ({ role, content })) };
+    if (options.files?.length) body.files = options.files;
+    const controller = new AbortController();
+    chatAbortRef.current = controller;
     try {
       await api.streamChat(body, {
+        signal: controller.signal,
         onDelta: (delta) => {
           buffer.value += delta;
           const nextMessages = [...outgoingMessages, { role: 'assistant', content: buffer.value, pending: true }];
@@ -591,11 +649,12 @@ export default function App() {
         onError: (streamError) => { setError(errorText(streamError)); },
       });
     } catch (streamError) {
-      setError(errorText(streamError));
-      const failedMessages = [...outgoingMessages, { role: 'assistant', content: buffer.value || 'The reply stopped before completion.' }];
+      const stopped = controller.signal.aborted;
+      if (!stopped) setError(errorText(streamError));
+      const failedMessages = [...outgoingMessages, { role: 'assistant', content: buffer.value || (stopped ? 'Stopped.' : 'The reply stopped before completion.') }];
       if (activeChatIdRef.current === chatId) setMessages(failedMessages);
       persistChatMessages(chatId, failedMessages);
-    } finally { setChatBusy(false); }
+    } finally { setChatBusy(false); if (chatAbortRef.current === controller) chatAbortRef.current = null; }
   }
 
   function navigatePreview(path) {
@@ -703,18 +762,17 @@ export default function App() {
               <h1 id="welcome-title">Build with clear intent.</h1>
               <p className="lead">Describe a change. Review the plan. Approve each action before it runs.</p></>}
               {messages.length > 0 && <div className="messages home-messages" aria-live="polite" aria-label="Conversation">{messages.map((message, index) => <article className={`message message-${message.role}`} key={`${index}-${message.role}`}><strong>{message.role === 'user' ? 'You' : 'Free way'}</strong><p>{message.content || (message.pending ? 'Thinking…' : '')}</p></article>)}</div>}
-              <form className="build-form" onSubmit={buildTask}>
+              <div className="build-form">
                 <label htmlFor="active-project">Project</label>
                 {realProjects.length === 0 && !project
                   ? <div className="project-row project-empty"><p>Create your first project to start building. You can still chat without one.</p><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>
                   : <div className="project-row"><select id="active-project" aria-label="Active project" value={project} onChange={(event) => chooseProject(event.target.value)}>{!project && <option value="">Choose a project</option>}{realProjects.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select><button type="button" className="button button-secondary" onClick={() => setProjectDialog(true)}>New project</button></div>}
-                <label htmlFor="build-prompt">What should Free way build?</label>
-                <textarea id="build-prompt" aria-label="Build prompt" value={buildPrompt} onChange={(event) => setBuildPrompt(event.target.value)} placeholder="Describe a small, testable change" rows="4" />
-                <label className="check-row"><input type="checkbox" checked={mission} onChange={(event) => setMission(event.target.checked)} /> Mission</label>
-                <p className="subtle">Standard builds use four sequential specialists. Mission keeps its existing milestone approval flow.</p>
-                <button className="button button-primary" type="submit" disabled={building}>{building ? 'Starting…' : 'Build'}</button>
-              </form>
-              
+              </div>
+              {!chatBusy && messages.length > 1 && messages[messages.length - 1]?.role === 'assistant' && !messages[messages.length - 1]?.pending && <AdSlot variant="strip" placement="chat" project={project} context={messages.filter((m) => m.role === 'user').slice(-2).map((m) => m.content).join(' ')} runKey={`home-${activeChatId || ''}-${messages.length}`} />}
+              <Composer value={buildPrompt} onChange={setBuildPrompt} onSubmit={buildTask} onStop={stopComposer} busy={composerBusy} stoppable={chatBusy || activeAgent?.state === 'orchestrating'} queued={queue.length}
+                mode={composerMode} onMode={setComposerMode} models={freeModels} model={composerModel} onModel={setComposerModel}
+                skills={skillsList.skills} skill={composerSkill} onSkill={setComposerSkill} skillsReason={skillsList.reason}
+                location={config?.mode === 'cloud' ? { label: 'Cloud', title: 'Runs on the Free way cloud server. Switching to Local is not available here.' } : { label: 'Local', title: 'Runs on this computer\'s Free way server.' }} />
             </div>
             
           </section>}

@@ -80,7 +80,7 @@ test('plan and action approvals stay explicit through diff and review', async ({
     if (new URL(request.url()).pathname.endsWith('/merge')) mergeRequests.push(request.url());
   });
   await page.getByLabel('Build prompt').fill('Build a small hello page');
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /^Plan approval required$/ })).toBeVisible();
   await page.getByRole('button', { name: 'Approve plan' }).click();
   await page.getByRole('button', { name: 'Approve action 1' }).click();
@@ -100,8 +100,8 @@ test('plan and action approvals stay explicit through diff and review', async ({
 test('Mission milestone completion requires its own approval before the next plan', async ({ page }) => {
   const externalRequests = await openOfflineWorkspace(page);
   await page.getByLabel('Build prompt').fill('Create a mission workspace');
-  await page.getByRole('checkbox', { name: 'Mission' }).check();
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('radio', { name: 'Mission' }).check();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /^Plan approval required$/ })).toBeVisible();
   await page.getByRole('button', { name: 'Approve plan' }).click();
   await page.getByRole('button', { name: 'Approve action 1' }).click();
@@ -123,7 +123,7 @@ test('Apps shows real local connector status without attempting external connect
 test('Preview provides refresh and in-session back/forward navigation after a completed action', async ({ page }) => {
   const externalRequests = await openOfflineWorkspace(page);
   await page.getByLabel('Build prompt').fill('Build a small hello page');
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   await page.getByRole('button', { name: 'Approve plan' }).click();
   await page.getByRole('button', { name: 'Approve action 1' }).click();
   await page.getByRole('button', { name: 'Reject action 2' }).click();
@@ -200,7 +200,7 @@ test('blocked actions never expose an approval control', async ({ page }) => {
     else await route.continue();
   });
   await page.getByLabel('Build prompt').fill('Try a blocked action');
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByText('pending · blocked', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Approve action 1' })).toHaveCount(0);
   expect(externalRequests).toEqual([]);

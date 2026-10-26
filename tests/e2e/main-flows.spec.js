@@ -31,14 +31,13 @@ test('home: new project dialog cancel and create, mission toggle, build starts',
   await page.getByLabel('Project name').fill(`Flow ${Date.now().toString(36)}`);
   await page.getByRole('button', { name: 'Create project' }).click();
   await expect(page.getByText(/Project created:/)).toBeVisible();
-  const mission = page.getByLabel('Mission');
-  await mission.check();
-  await mission.uncheck();
-  await page.getByRole('button', { name: 'Build', exact: true }).click();
+  await page.getByRole('radio', { name: 'Mission' }).check();
+  await page.getByRole('radio', { name: 'Build' }).check();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Describe what you want built.');
   await page.getByRole('button', { name: 'Dismiss error' }).click();
   await page.getByLabel('Build prompt').fill('Add a short welcome line to index.html');
-  await page.getByRole('button', { name: 'Build', exact: true }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Board', exact: true })).toBeVisible();
   await expect(page.locator('.state-badge').first()).toBeVisible();
   // Leave the shared test server idle: cancel the run if specialists are still working.

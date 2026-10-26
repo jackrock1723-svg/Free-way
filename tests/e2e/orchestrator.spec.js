@@ -29,7 +29,7 @@ test('plan agent mode from General settings runs planners only and proposes no a
     const createResponse = page.waitForResponse((response) =>
       new URL(response.url()).pathname === '/api/orchestrations' && response.request().method() === 'POST');
     await page.getByLabel('Build prompt').fill('Plan a pricing section for this project');
-    await page.getByRole('button', { name: 'Build' }).click();
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
     const response = await createResponse;
     expect(response.request().postDataJSON().mode).toBe('plan');
     const created = await response.json();
@@ -61,7 +61,7 @@ test('specialist progress preserves parent plan approval and per-action approval
   const createResponse = page.waitForResponse((response) =>
     new URL(response.url()).pathname === '/api/orchestrations' && response.request().method() === 'POST');
   await page.getByLabel('Build prompt').fill('Build a small accessible landing page for this project');
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   const response = await createResponse;
   expect(response.ok()).toBeTruthy();
   const created = await response.json();

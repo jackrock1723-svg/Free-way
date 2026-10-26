@@ -14,7 +14,7 @@ test('Home is the chat screen: no demo default, no status panel, heading hides o
 
   // A greeting becomes a conversation on Home; the heading disappears.
   await page.getByLabel('Build prompt').fill('hi');
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   const convo = page.locator('.home-messages');
   await expect(convo).toContainText('hi');
   await expect(convo.locator('.message-assistant p')).not.toHaveText(/^(Thinking\u2026)?$/, { timeout: 20_000 });
@@ -34,7 +34,7 @@ test('Home is the chat screen: no demo default, no status panel, heading hides o
   await page.reload();
   await page.getByRole('button', { name: 'Start a new chat' }).click();
   await page.getByLabel('Build prompt').fill('Build a small hello page');
-  await page.getByRole('button', { name: 'Build' }).click();
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /^Plan approval required$/ })).toBeVisible({ timeout: 20_000 });
   const agents = await (await page.request.get('/api/agents')).json();
   for (const a of agents.filter((x) => x.state === 'orchestrating')) await page.request.post(`/api/orchestrations/${a.id}/cancel`, { data: {} });

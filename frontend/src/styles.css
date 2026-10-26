@@ -982,3 +982,35 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(.home-messages, .build-form, .home-reply) { max-width: 720px; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .build-form textarea { border-radius: 24px; padding: 14px 16px; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(table, th, td) { border-color: var(--line); }
+
+/* Step 4: Freebuff-style composer and ad strip on Home. Colours come from theme tokens so dark and light both hold AA. */
+.composer { width: 100%; max-width: 720px; margin: 14px auto 0; display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); }
+.composer:focus-within { border-color: var(--accent); }
+.composer-modes { display: flex; flex-wrap: wrap; gap: 4px; }
+.composer-mode { position: relative; display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: 999px; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; }
+.composer-mode input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }
+.composer-mode.is-active { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+.composer-mode:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.composer-mode.is-disabled { cursor: not-allowed; opacity: .75; text-decoration: line-through; }
+.composer textarea { width: 100%; min-height: 64px; resize: vertical; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 14px; padding: 4px 4px; outline: none; box-shadow: none; }
+.composer textarea::placeholder { color: var(--faint); opacity: 1; }
+.composer-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.composer-spacer { flex: 1 1 auto; }
+.composer-icon, .composer-send { display: inline-grid; place-items: center; width: 32px; height: 32px; min-height: 32px; padding: 0; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-raised); color: var(--text); font-size: 16px; line-height: 1; cursor: pointer; }
+.composer-icon:disabled { cursor: not-allowed; color: var(--muted); }
+.composer-send { background: var(--text); color: var(--canvas); border-color: var(--text); font-weight: 600; }
+.composer-send:disabled { background: var(--surface-raised); color: var(--muted); border-color: var(--line); cursor: not-allowed; }
+.composer-send.is-stop { background: var(--accent); border-color: var(--accent); color: #0a0a0a; font-size: 12px; }
+.composer-select { min-height: 32px; max-width: 210px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-raised); color: var(--text); font-size: 13px; }
+.composer-location { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; }
+.composer-queue { color: var(--muted); font-size: 12px; }
+.composer-help { margin: 0 4px; font-size: 12px; }
+.ad-strip { display: flex; align-items: center; gap: 10px; width: min(100%, 720px); margin: 14px auto 0; padding: 6px 8px 6px 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-raised); }
+.ad-strip-icon { display: inline-grid; place-items: center; flex: 0 0 16px; width: 16px; height: 16px; border-radius: 4px; background: var(--accent); color: #0a0a0a; font-size: 10px; font-weight: 700; }
+.ad-strip-body { flex: 1 1 auto; min-width: 0; }
+.ad-strip-title { display: block; color: var(--text); font-size: 13px; font-weight: 500; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-strip-title:hover, .ad-strip-title:focus-visible { text-decoration: underline; }
+.ad-strip-line { margin: 0; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-strip-label { padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; font-size: 11px; }
+@media (max-width: 640px) { .composer { border-radius: 18px; } .composer-select { max-width: 150px; } }
+.workspace-shell[data-theme="light"] .approval-block > p:first-child { color: #4b3fa0; }
