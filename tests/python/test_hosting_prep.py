@@ -1,6 +1,7 @@
 """Hosting prep (Render): port from $PORT and safe forwarded proto."""
 from __future__ import annotations
 import unittest
+from pathlib import Path
 import server_fixture  # noqa: F401
 from freecode import server, sandbox
 from unittest.mock import patch
@@ -50,6 +51,12 @@ class HostedSandboxTests(unittest.TestCase):
         self.assertTrue(sandbox.is_hosted({"FREEWAY_HOSTED": "1"}))
         self.assertTrue(sandbox.is_hosted({"RENDER": "true"}))
         self.assertFalse(sandbox.is_hosted({}))
+
+class DockerfileDepsTests(unittest.TestCase):
+    def test_dockerfile_installs_runtime_deps(self):
+        text = (Path(__file__).resolve().parents[2] / "Dockerfile").read_text(encoding="utf-8")
+        for dep in ("pydantic", "google-auth", "psycopg[binary]"):
+            self.assertIn(dep, text)
 
 
 if __name__ == "__main__":

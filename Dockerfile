@@ -17,9 +17,9 @@ ENV PYTHONUNBUFFERED=1 \
     FREECODE_DATA=/tmp/freeway-data
 WORKDIR /app
 # Postgres driver goes in the pydeps folder (same layout the desktop app uses);
-# google-auth is needed to verify Google sign-in tokens.
+# pydantic is imported at startup (schema.py); google-auth verifies Google sign-in tokens.
 RUN pip install --no-cache-dir --target /app/pydeps "psycopg[binary]==3.3.6" \
- && pip install --no-cache-dir "google-auth>=2.30,<3"
+ && pip install --no-cache-dir "pydantic==2.14.1" "google-auth>=2.30,<3"
 COPY freecode ./freecode
 COPY web ./web
 COPY migrations ./migrations
