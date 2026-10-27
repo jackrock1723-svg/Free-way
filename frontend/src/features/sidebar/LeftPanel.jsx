@@ -69,7 +69,7 @@ export default function LeftPanel({ projects, chats, project, activeChatId, mode
       <div className="sidebar-actions fw-rows">
         <button type="button" className="sidebar-action fw-row" aria-label="Start a new chat" onClick={onNewChat}><Glyph d={paths.chat} /><span className="sidebar-label">New chat</span></button>
         <button type="button" className="sidebar-action fw-row" aria-label="Start a new project" onClick={onNewProject}><Glyph d={paths.project} /><span className="sidebar-label">New project</span></button>
-        <div className="fw-row fw-stat" title="Free way does not meter hours. Free model providers apply their own rate limits."><Glyph d={paths.hours} /><span>Daily hours</span><b className="fw-badge">No limit</b></div>
+        <div className="fw-row fw-stat" title="Free way does not meter hours. Free model providers apply their own rate limits."><Glyph d={paths.hours} /><span>Daily hours</span><b className="fw-badge">Provider limits</b></div>
         <div className="fw-row fw-stat" title="Nothing is charged, so there is no wallet balance. Free way is free and ad-supported."><Glyph d={paths.wallet} /><span>Wallet</span><b className="fw-badge">Free</b></div>
         <button type="button" className="fw-row" onClick={onOpenPlans}><Glyph d={paths.up} /><span>Free models &amp; limits</span></button>
       </div>
