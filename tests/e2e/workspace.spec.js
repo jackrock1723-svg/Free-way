@@ -38,7 +38,8 @@ async function settleServer(page) {
 
 const primary = (page) => page.getByRole('navigation', { name: 'Primary navigation' });
 
-test('new chat renders a streamed reply from the offline mock server', async ({ page }) => {
+test('new chat renders a streamed reply from the offline mock server', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openOfflineWorkspace(page);
   await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
   await page.getByLabel('New message').fill('hello from the workspace test');
