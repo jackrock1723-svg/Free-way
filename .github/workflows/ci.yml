@@ -1,0 +1,52 @@
+name: Free Way CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feat/freebuff-style-platform-roadmap
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install JavaScript dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Python test/runtime dependencies
+        run: python -m pip install --upgrade pip pytest playwright "pydantic==2.14.1" "google-auth>=2.30,<3" "psycopg[binary]==3.3.6"
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run JavaScript unit tests
+        run: npm run test:unit
+
+      - name: Run Python tests
+        run: python -m pytest tests -q
+
+      - name: Run desktop and mobile end-to-end tests
+        run: npm run test:e2e
