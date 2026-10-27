@@ -1218,3 +1218,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 
 /* Bug pass: fallback note readable on light themes too (was pale gold on white) */
 .fw-meta.is-fallback { color: color-mix(in srgb, #c9971f 72%, var(--text)); }
+
+
+/* Keep disabled secondary controls readable; opacity can push text below WCAG AA. */
+.workspace-shell .button-secondary:disabled { color: var(--text); opacity: 1; }
