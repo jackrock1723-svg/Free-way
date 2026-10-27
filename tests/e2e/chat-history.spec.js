@@ -27,7 +27,8 @@ function chatRow(page, title) {
   return page.locator('.chat-history-row').filter({ has: page.getByRole('button', { name: `Open chat ${title}`, exact: true }) });
 }
 
-test('mouse and keyboard menus pin and unpin a chat and keep the choice after reload', async ({ page }) => {
+test('mouse and keyboard menus pin and unpin a chat and keep the choice after reload', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page);
   await sendMessage(page, 'Pin this conversation');
   let row = chatRow(page, 'Pin this conversation');
@@ -50,7 +51,8 @@ test('mouse and keyboard menus pin and unpin a chat and keep the choice after re
   expect(externalRequests).toEqual([]);
 });
 
-test('renames an XSS-looking title and renders it as inert text', async ({ page }) => {
+test('renames an XSS-looking title and renders it as inert text', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page);
   await sendMessage(page, 'An ordinary first message');
   await chatRow(page, 'An ordinary first message').getByRole('button', { name: 'Actions for An ordinary first message' }).click();
@@ -66,7 +68,8 @@ test('renames an XSS-looking title and renders it as inert text', async ({ page 
   expect(externalRequests).toEqual([]);
 });
 
-test('archives a chat, lists it in Archived, and restores it to active history', async ({ page }) => {
+test('archives a chat, lists it in Archived, and restores it to active history', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page);
   await sendMessage(page, 'Move this to the archive');
   await chatRow(page, 'Move this to the archive').getByRole('button', { name: 'Actions for Move this to the archive' }).click();
@@ -84,7 +87,8 @@ test('archives a chat, lists it in Archived, and restores it to active history',
   expect(externalRequests).toEqual([]);
 });
 
-test('requires separate confirmation before permanently deleting a chat', async ({ page }) => {
+test('requires separate confirmation before permanently deleting a chat', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page);
   await sendMessage(page, 'Delete only after confirmation');
   const row = chatRow(page, 'Delete only after confirmation');
@@ -105,7 +109,8 @@ test('requires separate confirmation before permanently deleting a chat', async 
   expect(externalRequests).toEqual([]);
 });
 
-test('reload restores both the saved transcript and its renamed chat row', async ({ page }) => {
+test('reload restores both the saved transcript and its renamed chat row', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page);
   await sendMessage(page, 'Keep this transcript on reload');
   let row = chatRow(page, 'Keep this transcript on reload');
@@ -122,7 +127,8 @@ test('reload restores both the saved transcript and its renamed chat row', async
   expect(externalRequests).toEqual([]);
 });
 
-test('malformed legacy fc.chats data is preserved while new history remains usable', async ({ page }) => {
+test('malformed legacy fc.chats data is preserved while new history remains usable', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page, async () => {
     await page.addInitScript(() => localStorage.setItem('fc.chats', '[{"id":"unfinished"'));
   });
@@ -137,7 +143,8 @@ test('malformed legacy fc.chats data is preserved while new history remains usab
   expect(externalRequests).toEqual([]);
 });
 
-test('storage denial keeps the current transcript usable in session memory', async ({ page }) => {
+test('storage denial keeps the current transcript usable in session memory', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page, async () => {
     await page.addInitScript(() => {
       const getItem = Storage.prototype.getItem;
@@ -159,7 +166,8 @@ test('storage denial keeps the current transcript usable in session memory', asy
 });
 
 
-test('New chat creates a distinct transcript without replacing the saved conversation', async ({ page }) => {
+test('New chat creates a distinct transcript without replacing the saved conversation', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const externalRequests = await openChat(page);
   await sendMessage(page, 'First separate conversation');
   await page.getByRole('button', { name: 'New chat', exact: true }).click();
@@ -175,7 +183,8 @@ test('New chat creates a distinct transcript without replacing the saved convers
   expect(externalRequests).toEqual([]);
 });
 
-test('loads legacy fc.chats transcripts into v2 without deleting legacy data or message metadata', async ({ page }) => {
+test('loads legacy fc.chats transcripts into v2 without deleting legacy data or message metadata', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const legacyChat = {
     id: 'legacy-chat-1',
     mode: 'chat',

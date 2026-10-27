@@ -16,7 +16,7 @@ test('sidebar: new chat, projects with their chat history, open a chat, profile/
   // Freebuff browser layout: icon rail + panel with honest stat rows (no invented hour or wallet balances)
   await expect(side.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Earn' })).toBeVisible();
   await expect(side.locator('.fw-streak')).toContainText(/streak|No streak yet/);
-  await expect(side.locator('.fw-stat', { hasText: 'Daily hours' })).toContainText('No limit');
+  await expect(side.locator('.fw-stat', { hasText: 'Daily hours' })).toContainText('Provider limits');
   await expect(side.locator('.fw-stat', { hasText: 'Wallet' })).toContainText('Free');
   await side.getByRole('button', { name: 'Earn' }).click();
   await expect(page.locator('.settings-nav-item.is-current, [aria-current="page"]').filter({ hasText: 'Earn' }).first()).toBeVisible();

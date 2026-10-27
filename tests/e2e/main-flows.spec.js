@@ -62,7 +62,8 @@ test('every primary section opens without crashing', async ({ page }) => {
   }
 });
 
-test('chat: send, new chat, archived toggle', async ({ page }) => {
+test('chat: send, new chat, archived toggle', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const problems = guard(page);
   await page.goto('/');
   await page.getByRole('button', { name: 'Manage chats', exact: true }).click();

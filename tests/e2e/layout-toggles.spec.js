@@ -20,7 +20,8 @@ test('Ctrl+B and the top toggle collapse and restore the sidebar', async ({ page
   await expect(shell).toHaveClass(/sidebar-collapsed/);
 });
 
-test('a stopped reply shows a Stopped label instead of a fake answer', async ({ page }) => {
+test('a stopped reply shows a Stopped label instead of a fake answer', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   await seed(page, [{ id: 's1', title: 'Stop me', at: now, project: '', msgs: [
     { role: 'user', content: 'write a long story', at: now - 2 },
     { role: 'assistant', content: 'Stopped.', stopped: true, at: now - 1 },
@@ -52,7 +53,8 @@ test('the terminal says plainly when it is not available on hosted Free way', as
   await expect(page.getByRole('textbox', { name: 'Terminal command' })).toHaveCount(0);
 });
 
-test('split view shows a second chat chosen from the Choose chat picker', async ({ page }) => {
+test('split view shows a second chat chosen from the Choose chat picker', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   await seed(page, [
     { id: 'a1', title: 'First chat', at: now, project: '', msgs: [{ role: 'user', content: 'alpha question', at: now - 4 }, { role: 'assistant', content: 'alpha answer', at: now - 3 }] },
     { id: 'b2', title: 'Second chat', at: now - 10, project: '', msgs: [{ role: 'user', content: 'beta question', at: now - 14 }, { role: 'assistant', content: 'beta answer', at: now - 13 }] },

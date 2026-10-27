@@ -560,8 +560,8 @@ class OrchestratorManager:
                     messages,
                     schema=SCHEMAS[role],
                     skill="code" if role == "implement" else "plan",
-                    retries=0,
-                    max_provider_attempts=1,
+                    retries=1,
+                    max_provider_attempts=3,
                 )
                 serialized = json.dumps(result.model_dump(), ensure_ascii=False, separators=(",", ":"))
                 if len(serialized) > MAX_CHILD_OUTPUT_CHARS:
