@@ -497,7 +497,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .button-secondary { border-color: var(--line); background: var(--surface-raised); color: var(--text); }
 .button-secondary:hover { border-color: #3a567e; }
 .button-warning { border-color: #70503d; background: #33251e; color: #ffd4b6; }
-.text-button { min-height: 40px; padding: 0 9px; background: transparent; color: #e6a7aa; }
+.text-button { min-height: 40px; padding: 0 9px; background: transparent; color: #8bbcff; }
 .subtle, .loading-note { color: var(--faint); font-size: 12px; }
 .alert, .toast { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--surface); }
 .alert { border-color: #704449; color: #ffcdce; }
