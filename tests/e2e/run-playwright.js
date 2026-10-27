@@ -3,7 +3,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const python = process.env.FC_PYTHON_EXE || 'python.exe';
+// Respect an explicit interpreter override, but choose a command that exists on the current OS by default.
+const python = process.env.FC_PYTHON_EXE || (process.platform === 'win32' ? 'python.exe' : 'python3');
 const playwrightCli = path.join(repoRoot, 'node_modules', '@playwright', 'test', 'cli.js');
 const providerEnvNames = [
   'OPENROUTER_API_KEY',
