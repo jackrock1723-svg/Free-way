@@ -36,7 +36,7 @@ function checkTheme(name, t) {
   }
 }
 
-test('default theme is Freebuff-style dark with a pink accent; white stays as Light', () => {
+test('default theme is Freebuff-style dark with a blue accent; white stays as Light', () => {
   const root = vars(tokens);
   assert.equal(root.canvas, '#0a0a0a');
   assert.equal(root.sidebar, '#0f0f0f');
@@ -45,7 +45,7 @@ test('default theme is Freebuff-style dark with a pink accent; white stays as Li
   assert.match(tokens, /color-scheme:\s*dark/);
   const def = vars(themeBlock('.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) {'));
   assert.equal(def.canvas, '#0a0a0a');
-  assert.equal(def.accent, '#f472b6');
+  assert.equal(def.accent, '#6ea8fe');
   const light = vars(themeBlock('.workspace-shell[data-theme="light"] {'));
   assert.equal(light.canvas, '#ffffff');
   assert.ok(contrast(def.line, def.canvas) >= 1.6 && contrast(def.line, def.surface) >= 1.4, 'card/table borders must stay visible');
@@ -57,7 +57,7 @@ test('theme text tokens meet WCAG AA (4.5:1) on every surface', () => {
   checkTheme('dark default', vars(themeBlock('.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) {')));
 });
 
-test('pink primary button, alert and error colours are readable', () => {
+test('blue primary button, alert and error colours are readable', () => {
   assert.ok(contrast('#ffffff', '#be185d') >= 4.5, 'white on pink button');
   assert.ok(contrast('#ffffff', '#9d174d') >= 4.5, 'white on pink button hover');
   assert.ok(contrast('#881337', '#fff1f5') >= 4.5, 'light alert');
@@ -66,8 +66,8 @@ test('pink primary button, alert and error colours are readable', () => {
   assert.ok(contrast('#7c2d12', '#fff7ed') >= 4.5, 'light warning button');
   assert.ok(contrast('#be185d', '#ffffff') >= 4.5, 'focus/badge pink on white');
   assert.ok(contrast('#831843', '#fce7f3') >= 4.5, 'current nav item');
-  assert.ok(contrast('#0a0a0a', '#f472b6') >= 4.5, 'dark: black on pink button');
-  assert.ok(contrast('#fecdd3', '#2a0f1a') >= 4.5, 'dark alert');
+  assert.ok(contrast('#0a0a0a', '#6ea8fe') >= 4.5, 'dark: black on pink button');
+  assert.ok(contrast('#fecdd3', '#15243a') >= 4.5, 'dark alert');
   assert.ok(contrast('#fbcfe8', '#3b1730') >= 4.5, 'dark badge');
   assert.ok(contrast('#ebebeb', '#1c1c1c') >= 4.5, 'dark user bubble');
 });
