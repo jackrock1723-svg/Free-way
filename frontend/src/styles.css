@@ -635,7 +635,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
   color: var(--text);
 }
 
-.workspace-shell[data-theme="dark"] { --canvas: #0b0b0c; --sidebar: #0e1015; --surface: #12141b; --surface-raised: #191c25; --line: #272b36; --text: #ececf2; --muted: #b9bdc9; --faint: #969dad; --accent: #2fd46b; --accent-soft: #2a1630; --good: #86d8b3; }
+.workspace-shell[data-theme="dark"] { --canvas: #0b0b0c; --sidebar: #0e1015; --surface: #12141b; --surface-raised: #191c25; --line: #272b36; --text: #ececf2; --muted: #b9bdc9; --faint: #969dad; --accent: #f472b6; --accent-soft: #2a1630; --good: #86d8b3; }
 .workspace-shell[data-theme="og-shine"] { --canvas: #0a0b13; --sidebar: #0e101a; --surface: #131522; --surface-raised: #1b1d2e; --line: #303149; --text: #f0efff; --muted: #c4c1df; --faint: #a09dbd; --accent: #a99aff; --accent-soft: #28213f; --good: #8be2bf; }
 .workspace-shell[data-theme="alpine"] { --canvas: #0a120e; --sidebar: #0e1712; --surface: #121d17; --surface-raised: #1a2920; --line: #2b4033; --text: #e9f4ec; --muted: #bdcfbf; --faint: #94ad98; --accent: #9de0b0; --accent-soft: #1e3727; --good: #9de0b0; }
 .workspace-shell[data-theme="dune"] { --canvas: #151108; --sidebar: #1b160c; --surface: #211a0d; --surface-raised: #302516; --line: #4b3a21; --text: #f8efdc; --muted: #d8c7a8; --faint: #b9a17b; --accent: #f1c17a; --accent-soft: #3b2c18; --good: #afd19a; }
@@ -939,7 +939,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .sidebar-chat.is-current { font-weight: 620; }
 .sidebar-empty { padding: 6px 10px; color: var(--muted); font-size: 12px; }
 .sidebar-footer { display: flex; align-items: center; gap: 10px; }
-.profile-button { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #2fd46b; color: #0a0a0a; font-weight: 700; cursor: pointer; }
+.profile-button { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #f472b6; color: #0a0a0a; font-weight: 700; cursor: pointer; }
 .sidebar-session { display: grid; min-width: 0; gap: 2px; color: var(--text); font-size: 12px; }
 .sidebar-session small { color: var(--muted); font-size: 11px; }
 .workspace-shell.sidebar-collapsed { grid-template-columns: 64px minmax(0, 1fr); }
@@ -961,16 +961,16 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 
 /* Freebuff-style dark default ("Auto" and "Dark"): #0a0a0a canvas, #0f0f0f chrome, #171717/#1c1c1c surfaces, light 400-500 type,
    Free way pink accent. Borders a step brighter than Freebuff (#262626) so card/table corners stay clearly visible. White = "Light". */
-.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) { --canvas: #0a0a0a; --sidebar: #0f0f0f; --surface: #171717; --surface-raised: #1c1c1c; --line: #3a3a3a; --text: #ebebeb; --muted: #a3a3a3; --faint: #949494; --accent: #2fd46b; --accent-soft: #0f2a1a; --good: #86d8b3; --focus: #5be08f; color-scheme: dark; background-image: none; font-size: 14px; font-weight: 400; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) { --canvas: #0a0a0a; --sidebar: #0f0f0f; --surface: #171717; --surface-raised: #1c1c1c; --line: #3a3a3a; --text: #ebebeb; --muted: #a3a3a3; --faint: #949494; --accent: #f472b6; --accent-soft: #2a0f1a; --good: #86d8b3; --focus: #f472b6; color-scheme: dark; background-image: none; font-size: 14px; font-weight: 400; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .sidebar { background: var(--sidebar); -webkit-backdrop-filter: none; backdrop-filter: none; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .topbar { background: var(--sidebar); }
-.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-primary { background: #2fd46b; color: #0a0a0a; font-weight: 500; box-shadow: none; }
-.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-primary:hover { background: #5be08f; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-primary { background: #f472b6; color: #0a0a0a; font-weight: 500; box-shadow: none; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-primary:hover { background: #f9a8d4; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .nav-item.is-current { color: var(--text); }
-.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .runtime-badge { border-color: var(--line); color: #5be08f; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .runtime-badge { border-color: var(--line); color: #f9a8d4; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .alert { border-color: #5c2626; background: #1d1212; color: #e7a3a3; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(.error-text, .settings-inline-error, .token-signin .token-signin-error) { color: #fca5a5; }
-.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .text-button { color: #5be08f; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .text-button { color: #f9a8d4; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .button-warning { border-color: #92400e; background: #2b1d0e; color: #fde3c4; }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :is(.chat-history-open:hover, .chat-history-open[aria-current="true"]) { color: var(--text); }
 .workspace-shell:is([data-theme="auto"], [data-theme="dark"]) .state-badge { border-color: var(--line); background: var(--accent-soft); color: #fbcfe8; }
@@ -1083,7 +1083,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .fw-row svg { flex: none; color: var(--muted); }
 .fw-stat { cursor: default; }
 .fw-stat span { flex: 1 1 auto; }
-.fw-badge { padding: 1px 6px; border-radius: 4px; background: #2fd46b; color: #0a0a0a; font-size: 10px; font-weight: 600; }
+.fw-badge { padding: 1px 6px; border-radius: 4px; background: #f472b6; color: #0a0a0a; font-size: 10px; font-weight: 600; }
 .fw-panel .sidebar-projects { margin-top: 4px; }
 .fw-panel .nav-caption { margin: 14px 8px 4px; font-size: 12px; }
 .fw-folder { display: flex; align-items: center; }
@@ -1115,8 +1115,8 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 }
 
 /* Single accent: near-black neutrals + one darker neon green. Focus rings, links, current items and primary buttons all use it. */
-.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) { --accent: #2fd46b; --accent-soft: #0f2a1a; --focus: #2fd46b; --good: #2fd46b; }
-.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :focus-visible { outline-color: #2fd46b; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) { --accent: #f472b6; --accent-soft: #2a0f1a; --focus: #f472b6; --good: #2fd46b; }
+.workspace-shell:is([data-theme="auto"], [data-theme="dark"]) :focus-visible { outline-color: #f472b6; }
 .workspace-shell[data-theme="light"] { --accent: #15803d; --accent-soft: #e3f3e8; --focus: #15803d; }
 .workspace-shell[data-theme="light"] .button-primary { background: #15803d; color: #ffffff; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
