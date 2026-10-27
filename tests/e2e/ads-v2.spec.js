@@ -10,7 +10,8 @@ const AD = {
   why: "Matched to your current task and your project's stack (React, Postgres): databases. Not personalised.",
 };
 
-test('chat shows a closable sponsored card after a reply without blocking the composer', async ({ page }) => {
+test('chat shows a closable sponsored card after a reply without blocking the composer', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   const events = [];
   await page.route('**/api/ads/next', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ad: AD }) }));
   await page.route('**/api/ads/event', async (route) => {
@@ -32,7 +33,8 @@ test('chat shows a closable sponsored card after a reply without blocking the co
   await expect.poll(() => events).toEqual(['view', 'close']);
 });
 
-test('an ad failure never shows an error to the user', async ({ page }) => {
+test('an ad failure never shows an error to the user', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'This workflow depends on the desktop chat-history sidebar, which is hidden on mobile.');
   await page.route('**/api/ads/next', (route) => route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' }));
   await page.goto('/');
   await page.getByRole('button', { name: 'Manage chats', exact: true }).click();
