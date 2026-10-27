@@ -45,6 +45,8 @@ jobs:
         run: npm run test:unit
 
       - name: Run Python tests
+        env:
+          PYTHONPATH: tests/python
         run: python -m pytest tests -q
 
       - name: Run desktop and mobile end-to-end tests
