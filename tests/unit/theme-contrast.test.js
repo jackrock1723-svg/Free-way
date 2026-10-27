@@ -18,9 +18,14 @@ function vars(block) {
   return Object.fromEntries([...block.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})/g)].map((m) => [m[1], m[2].toLowerCase()]));
 }
 function themeBlock(selector) {
-  const i = css.lastIndexOf(selector);
-  assert.ok(i >= 0, `missing ${selector}`);
-  return css.slice(i, css.indexOf('}', i));
+  let i = css.lastIndexOf(selector);
+  while (i >= 0) {
+    const end = css.indexOf('}', i);
+    const block = css.slice(i, end);
+    if (block.includes('--canvas:') && block.includes('--surface:')) return block;
+    i = css.lastIndexOf(selector, i - 1);
+  }
+  assert.fail(`missing complete theme variables for ${selector}`);
 }
 function checkTheme(name, t) {
   for (const fg of ['text', 'muted', 'faint']) {
