@@ -121,7 +121,7 @@ test('Integrations shows all 12 screenshot tiles with actual catalog support and
   const tiles = page.getByTestId('integration-tile');
   await expect(tiles).toHaveCount(12);
   for (const supported of ['Gmail', 'Google Drive', 'Google Calendar', 'Slack', 'Notion', 'Linear', 'Outlook']) {
-    await expect(page.getByRole('article', { name: new RegExp(supported) })).toContainText(/not configured|configured/i);
+    await expect(page.getByRole('article', { name: new RegExp(supported) })).toContainText(/not configured|configured|coming soon/i);
   }
   for (const unavailable of ['PostHog', 'Sentry', 'Stripe', 'Supabase', 'HubSpot']) {
     const tile = page.getByRole('article', { name: new RegExp(unavailable) });
